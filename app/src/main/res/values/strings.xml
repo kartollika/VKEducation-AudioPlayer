@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">VKEducationPlayer</string>
+    <string name="select_folder_to_play">Выбрать папку</string>
 </resources>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <padding
+        android:bottom="@dimen/default_three_quarters_vertical_margin"
+        android:left="@dimen/default_three_quarters_horizontal_margin"
+        android:right="@dimen/default_three_quarters_horizontal_margin"
+        android:top="@dimen/default_three_quarters_vertical_margin" />
+
+    <corners android:radius="12dp" />
+
+    <gradient
+        android:angle="270"
+        android:endColor="#3F8AE0"
+        android:startColor="#72BDF1" />
+</shape>
