@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">VKEducationPlayer</string>
-    <string name="select_folder_to_play">Выбрать папку</string>
+    <string name="choose_music_folder_title">Откуда играть музыку?</string>
+    <string name="choose_music_folder_description">Выберите папку с аудиозаписями</string>
+    <string name="choose_music_folder_action">Выбрать папку</string>
+
+    <string name="timeline_default">0:00</string>
 </resources>

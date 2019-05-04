@@ -1,4 +1,4 @@
-package kartollika.vkeducation.audioplayer.common.ui
+package kartollika.vkeducation.audioplayer.common.utils
 
 import android.view.View
 import android.view.ViewTreeObserver

@@ -6,10 +6,10 @@
         android:right="@dimen/default_three_quarters_horizontal_margin"
         android:top="@dimen/default_three_quarters_vertical_margin" />
 
-    <corners android:radius="12dp" />
+    <corners android:radius="16dp" />
 
     <gradient
         android:angle="270"
         android:endColor="#3F8AE0"
-        android:startColor="#72BDF1" />
+        android:startColor="#73BEF2" />
 </shape>
