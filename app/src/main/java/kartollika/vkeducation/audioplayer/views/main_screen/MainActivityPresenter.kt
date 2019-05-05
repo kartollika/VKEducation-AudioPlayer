@@ -7,5 +7,9 @@ class MainActivityPresenter(view: MainActivityContract.MainActivityView) :
     MainActivityContract.MainActivityPresenter {
 
     override fun onOpenFolderAction() {
+        view.checkStoragePermission()
+    }
+
+    override fun onOpenFolderStoragePermissionGranted() {
     }
 }
