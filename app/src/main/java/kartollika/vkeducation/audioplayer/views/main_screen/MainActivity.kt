@@ -11,7 +11,6 @@ import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Toast
 import kartollika.vkeducation.audioplayer.R
-import kartollika.vkeducation.audioplayer.player.PlayerBinder
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.views.player_view.FloatingBottomPlayer
 import kotlinx.android.synthetic.main.activity_main.*
@@ -24,13 +23,13 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     private var playerService: PlayerService? = null
     private var isPlayerBounded = false
     private val serviceConnection = object : ServiceConnection {
-        override fun onServiceDisconnected(name: ComponentName?) {
-            isPlayerBounded = false
+        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
+            playerService = (binder as PlayerService.AudioPlayerBinder).getService()
+            isPlayerBounded = true
         }
 
-        override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            playerService = (binder as PlayerBinder).playerService
-            isPlayerBounded = true
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isPlayerBounded = false
         }
     }
 
@@ -77,8 +76,11 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     }
 
     private fun bindPlayerService() {
-        val playerServiceIntent = getPlayerServiceIntent()
-        bindService(playerServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        if (!isPlayerBounded) {
+            val playerServiceIntent = getPlayerServiceIntent()
+            startService(playerServiceIntent)
+            bindService(playerServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        }
     }
 
     private fun getPlayerServiceIntent() = Intent(this, PlayerService::class.java)
