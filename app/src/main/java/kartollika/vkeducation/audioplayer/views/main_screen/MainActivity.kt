@@ -2,7 +2,6 @@ package kartollika.vkeducation.audioplayer.views.main_screen
 
 import android.os.Bundle
 import android.support.design.widget.BottomSheetBehavior
-import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.widget.Toast
@@ -32,8 +31,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
             }
 
             override fun onStateChanged(p0: View, p1: Int) {
-                window.statusBarColor =
-                    ContextCompat.getColor(this@MainActivity, android.R.color.black)
             }
         })
 

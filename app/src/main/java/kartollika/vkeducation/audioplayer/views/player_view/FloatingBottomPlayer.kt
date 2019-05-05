@@ -9,7 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import kartollika.vkeducation.audioplayer.R
+import kartollika.vkeducation.audioplayer.common.utils.dpToPx
 import kartollika.vkeducation.audioplayer.common.utils.onRenderFinished
+import kotlinx.android.synthetic.main.view_audio_player.view.*
 
 class FloatingBottomPlayer(
     context: Context,
@@ -19,6 +21,8 @@ class FloatingBottomPlayer(
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private val callbacks: MutableList<BottomSheetBehavior.BottomSheetCallback> = mutableListOf()
+    private lateinit var miniPlayer: View
+    private lateinit var fullPlayer: View
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
@@ -32,7 +36,7 @@ class FloatingBottomPlayer(
         onRenderFinished(this, Runnable {
             val layoutParams = layoutParams as CoordinatorLayout.LayoutParams
             bottomSheetBehavior = layoutParams.behavior as BottomSheetBehavior<View>
-            bottomSheetBehavior.peekHeight = 200
+            bottomSheetBehavior.peekHeight = dpToPx(60f, context)
 
             bottomSheetBehavior.setBottomSheetCallback(object :
                 BottomSheetBehavior.BottomSheetCallback() {
@@ -51,6 +55,17 @@ class FloatingBottomPlayer(
 
             this.layoutParams = layoutParams
         })
+
+        miniPlayer = view_mini_player
+        fullPlayer = bottom_sheet_container
+
+        bottom_sheet_hide_arrow.setOnClickListener {
+            if (getSheetState() == BottomSheetBehavior.STATE_EXPANDED) {
+                collapseSheet()
+            } else {
+                expandeSheet()
+            }
+        }
     }
 
     fun initPlayerFragment(fragmentManager: FragmentManager) {
@@ -58,6 +73,24 @@ class FloatingBottomPlayer(
             .beginTransaction()
             .replace(R.id.player_container, PlayerFragment())
             .commit()
+
+        initSmoothAnimations()
+    }
+
+    private fun initSmoothAnimations() {
+        addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+            override fun onSlide(p0: View, offset: Float) {
+                miniPlayer.alpha = 1 - 1 / 0.3f * offset
+                fullPlayer.alpha =
+                    Math.min(1 / 0.3f * offset - 1 - offset, 1f)
+            }
+
+            override fun onStateChanged(p0: View, state: Int) {
+            }
+        })
+        fullPlayer.visibility = View.VISIBLE
+        miniPlayer.visibility = View.VISIBLE
+        fullPlayer.alpha = 0f
     }
 
     fun addCallback(callback: BottomSheetBehavior.BottomSheetCallback) {
