@@ -5,13 +5,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <android.support.v7.widget.RecyclerView
+    <kartollika.vkeducation.audioplayer.common.views.AudioTracksCarouselRecyclerView
         android:id="@+id/tracks_recyclerview"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:clipToPadding="false"
-        android:nestedScrollingEnabled="false" />
+        android:nestedScrollingEnabled="false"
+        android:overScrollMode="never" />
 
     <kartollika.vkeducation.audioplayer.common.views.audio_seekbar.AudioSeekbar
         android:id="@+id/audio_seekbar_view"
