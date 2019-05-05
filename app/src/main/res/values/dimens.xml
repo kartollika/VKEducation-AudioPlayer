@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="default_horizontal_margin">16dp</dimen>
+    <dimen name="default_vertical_margin">16dp</dimen>
+
+    <dimen name="default_half_horizontal_margin">8dp</dimen>
+    <dimen name="default_half_vertical_margin">8dp</dimen>
+
+    <dimen name="default_three_quarters_horizontal_margin">12dp</dimen>
+    <dimen name="default_three_quarters_vertical_margin">12dp</dimen>
+
+    <dimen name="default_quarter_horizontal_margin">4dp</dimen>
+    <dimen name="default_quarter_vertical_margin">4dp</dimen>
+
+    <dimen name="default_double_horizontal_margin">32dp</dimen>
+    <dimen name="default_double_vertical_margin">32dp</dimen>
+</resources>
