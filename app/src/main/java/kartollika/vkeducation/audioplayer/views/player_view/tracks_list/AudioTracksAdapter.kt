@@ -6,12 +6,16 @@ import android.view.ViewGroup
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.data.models.AudioTrack
 
-class AudioTracksAdapter(private val audioTracks: List<AudioTrack>) : RecyclerView.Adapter<AudioTrackViewHolder>() {
+class AudioTracksAdapter(private val audioTracks: List<AudioTrack>) :
+    RecyclerView.Adapter<AudioTrackViewHolder>() {
 
     override fun onCreateViewHolder(container: ViewGroup, p1: Int): AudioTrackViewHolder {
-        return AudioTrackViewHolder(
-            LayoutInflater.from(container.context).inflate(R.layout.audiotrack_item, container, false)
+        val view = LayoutInflater.from(container.context).inflate(
+            R.layout.audiotrack_item,
+            container,
+            false
         )
+        return AudioTrackViewHolder(view)
     }
 
     override fun getItemCount(): Int = audioTracks.size
