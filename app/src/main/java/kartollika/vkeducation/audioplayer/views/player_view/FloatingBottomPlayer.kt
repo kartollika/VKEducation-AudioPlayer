@@ -4,14 +4,12 @@ import android.content.Context
 import android.support.design.widget.BottomSheetBehavior
 import android.support.design.widget.CoordinatorLayout
 import android.support.v4.app.FragmentManager
-import android.support.v4.content.ContextCompat
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.FrameLayout
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.common.utils.onRenderFinished
-import kotlinx.android.synthetic.main.view_audio_player.view.*
 
 class FloatingBottomPlayer(
     context: Context,
@@ -29,7 +27,7 @@ class FloatingBottomPlayer(
     }
 
     private fun initContent() {
-        LayoutInflater.from(context).inflate(R.layout.view_audio_player, this)
+        LayoutInflater.from(context).inflate(R.layout.view_audio_player, this, true)
 
         onRenderFinished(this, Runnable {
             val layoutParams = layoutParams as CoordinatorLayout.LayoutParams
@@ -53,9 +51,6 @@ class FloatingBottomPlayer(
 
             this.layoutParams = layoutParams
         })
-
-        root.background =
-            ContextCompat.getDrawable(context, R.drawable.audio_player_background)
     }
 
     fun initPlayerFragment(fragmentManager: FragmentManager) {
