@@ -12,8 +12,7 @@ class AudioTracksCarouselRecyclerView(context: Context, attrs: AttributeSet?, de
     constructor(context: Context) : this(context, null)
 
     fun <T : ViewHolder> setupAdapter(adapter: Adapter<T>) {
-        layoutManager =
-            ZoomCentralLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        layoutManager = ZoomCentralLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
         adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
             override fun onChanged() {

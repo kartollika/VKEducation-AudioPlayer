@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.data.models.AudioTrack
 
-class AudioTracksAdapter(private val audioTracks: List<AudioTrack>) :
+class AudioTracksAdapter(var audioTracks: List<AudioTrack>) :
     RecyclerView.Adapter<AudioTrackViewHolder>() {
 
     override fun onCreateViewHolder(container: ViewGroup, p1: Int): AudioTrackViewHolder {
