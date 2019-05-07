@@ -120,7 +120,6 @@ class PlayerService : Service() {
         }
 
         exoPlayer.prepare(mediaSource)
-        playMusic()
     }
 
     private fun reloadExoPlayer() {

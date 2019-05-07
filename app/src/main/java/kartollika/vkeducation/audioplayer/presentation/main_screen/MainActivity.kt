@@ -25,6 +25,7 @@ import android.view.View
 import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
 import kartollika.vkeducation.audioplayer.data.models.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
+import kartollika.vkeducation.audioplayer.presentation.folder_chooser.FolderChooserActivity
 import kartollika.vkeducation.audioplayer.presentation.player.FloatingBottomPlayer
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -98,18 +99,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
                 super.onActivityResult(requestCode, resultCode, data)
 
                 if (resultCode == Activity.RESULT_OK) {
-                    if (data == null) {
-                        return
-                    }
-
-                    val filePath = data!!.data.path
-                    val fileName = data!!.data.lastPathSegment
-                    val lastPos = filePath.length - fileName.length
-                    val folder = filePath.substring(0, lastPos)
-                    val folderName: String =
-                        data.data.pathSegments[data.data.pathSegments.lastIndex - 1] ?: ""
-                    PreferencesUtils(this).saveLastPlayedDirectory(folder)
-
+                    val folder = data?.getStringExtra("chosen_folder") ?: return
                     LoaderManager.getInstance(this)
                         .initLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
                 }
@@ -121,7 +111,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
     }
 
     override fun openFolderSelectView() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        val intent = Intent(this, FolderChooserActivity::class.java)
         startActivityForResult(intent, 9999)
     }
 
