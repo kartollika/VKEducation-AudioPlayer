@@ -7,5 +7,6 @@ class MainActivityPresenter(view: MainActivityContract.MainActivityView) :
     MainActivityContract.MainActivityPresenter {
 
     override fun onOpenFolderAction() {
+        view.openFolderSelectView()
     }
 }
