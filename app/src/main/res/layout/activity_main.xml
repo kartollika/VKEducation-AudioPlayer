@@ -53,7 +53,7 @@
 
     </FrameLayout>
 
-    <kartollika.vkeducation.audioplayer.views.player_view.FloatingBottomPlayer
+    <kartollika.vkeducation.audioplayer.presentation.player.FloatingBottomPlayer
         android:id="@+id/floating_player"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

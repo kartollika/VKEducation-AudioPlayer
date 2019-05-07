@@ -1,4 +1,4 @@
-package kartollika.vkeducation.audioplayer.views.player_view
+package kartollika.vkeducation.audioplayer.presentation.player
 
 import android.content.Context
 import android.support.design.widget.BottomSheetBehavior
