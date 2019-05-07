@@ -100,6 +100,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
 
                 if (resultCode == Activity.RESULT_OK) {
                     val folder = data?.getStringExtra("chosen_folder") ?: return
+                    PreferencesUtils(this).saveLastPlayedDirectory(folder)
                     LoaderManager.getInstance(this)
                         .initLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
                 }
