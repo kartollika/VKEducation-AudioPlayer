@@ -7,13 +7,15 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.Fragment
-import android.support.v7.widget.PagerSnapHelper
+import android.support.v7.widget.LinearSnapHelper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.common.mocks.getAudioTracksMocks
 import kartollika.vkeducation.audioplayer.common.views.AudioTracksCarouselRecyclerView
+import kartollika.vkeducation.audioplayer.common.views.SnapOnScrollListener
+import kartollika.vkeducation.audioplayer.common.views.attachSnapHelperWithListener
 import kartollika.vkeducation.audioplayer.common.views.audio_seekbar.AudioSeekbar
 import kartollika.vkeducation.audioplayer.data.models.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
@@ -65,9 +67,15 @@ class PlayerFragment : Fragment() {
 
         tracksAdapter = AudioTracksAdapter(getAudioTracksMocks())
         tracksRecyclerView.setupAdapter(tracksAdapter)
-        PagerSnapHelper().apply {
+        tracksRecyclerView.attachSnapHelperWithListener(LinearSnapHelper().apply {
             attachToRecyclerView(tracksRecyclerView)
-        }
+        },
+            SnapOnScrollListener.Behavior.NOTIFY_ON_SCROLL_IDLE,
+            object : SnapOnScrollListener.OnSnapPositionChangeListener {
+                override fun onSnapPositionChange(position: Int) {
+                }
+            })
+
         return view
     }
 
