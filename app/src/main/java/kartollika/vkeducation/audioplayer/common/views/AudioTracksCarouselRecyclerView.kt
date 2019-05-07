@@ -17,9 +17,11 @@ class AudioTracksCarouselRecyclerView(context: Context, attrs: AttributeSet?, de
         adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
             override fun onChanged() {
                 post {
-                    val sidePadding = (width / 2) - (getChildAt(0).width / 2)
-                    setPadding(sidePadding, 0, sidePadding, 0)
-                    scrollToPosition(0)
+                    if (childCount > 0) {
+                        val sidePadding = (width / 2) - (getChildAt(0).width / 2)
+                        setPadding(sidePadding, 0, sidePadding, 0)
+                        scrollToPosition(0)
+                    }
                 }
             }
         })
