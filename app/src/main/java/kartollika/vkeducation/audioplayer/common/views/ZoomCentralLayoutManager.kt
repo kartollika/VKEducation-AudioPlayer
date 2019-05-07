@@ -41,4 +41,9 @@ class ZoomCentralLayoutManager(context: Context?, orientation: Int, reverseLayou
         super.onLayoutChildren(recycler, state)
         scrollHorizontallyBy(0, recycler, state)
     }
+
+    override fun canScrollHorizontally(): Boolean {
+        return childCount >= 2
+
+    }
 }
