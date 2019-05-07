@@ -11,5 +11,6 @@ class MainActivityPresenter(view: MainActivityContract.MainActivityView) :
     }
 
     override fun onOpenFolderStoragePermissionGranted() {
+        view.openFolderSelectView()
     }
 }
