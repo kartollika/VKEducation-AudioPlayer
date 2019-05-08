@@ -135,7 +135,7 @@ class FolderChooserActivity : AppCompatActivity() {
             foldersAdapter.setFolders(roots)
             currentFolder = ""
         } else {
-            currentFolder = previousBackstack.pop()
+            currentFolder = previousBackstack.peekLast()
             foldersAdapter.setFolders(getSubDirectories(currentFolder))
         }
         foldersAdapter.notifyDataSetChanged()
