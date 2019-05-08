@@ -75,13 +75,6 @@ class PlayerService : Service() {
         this.onTracksChangesListener = tracksChangesListener
     }
 
-    fun addOnPlayerInitListener(listener: OnPlayerInitListener) {
-        if (exoPlayer != null) {
-            listener.onPlayerInit(exoPlayer!!)
-        }
-        this.onPlayerInitListener = listener
-    }
-
     fun getActiveTracks(): List<AudioTrack> = audioTracks.toList()
 
     private fun reloadTracks() {

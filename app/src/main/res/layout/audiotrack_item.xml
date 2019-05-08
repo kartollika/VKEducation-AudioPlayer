@@ -28,7 +28,7 @@
         android:gravity="center">
 
         <TextView
-            android:id="@+id/artist_name_textview"
+            android:id="@+id/artistNameTextView"
             android:layout_width="wrap_content"
             android:layout_marginRight="@dimen/default_half_horizontal_margin"
             android:layout_height="wrap_content"
@@ -37,18 +37,18 @@
             android:textSize="24sp" />
 
         <ImageView
-            android:id="@+id/explicit_song"
+            android:id="@+id/explicitSongLogoView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignBaseline="@id/artist_name_textview"
-            android:layout_toRightOf="@id/artist_name_textview"
+            android:layout_alignBaseline="@id/artistNameTextView"
+            android:layout_toRightOf="@id/artistNameTextView"
             android:baselineAlignBottom="true"
             android:src="@drawable/ic_explicit" />
 
     </RelativeLayout>
 
     <TextView
-        android:id="@+id/song_name_textview"
+        android:id="@+id/songNameTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
