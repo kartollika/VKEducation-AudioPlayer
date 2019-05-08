@@ -1,6 +1,6 @@
 package kartollika.vkeducation.audioplayer.common.mocks
 
-import kartollika.vkeducation.audioplayer.data.models.AudioTrack
+import kartollika.vkeducation.audioplayer.player.AudioTrack
 
 fun getAudioTracksMocks(): List<AudioTrack> {
     return listOf(

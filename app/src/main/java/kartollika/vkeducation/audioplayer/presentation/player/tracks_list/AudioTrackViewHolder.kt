@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import kartollika.vkeducation.audioplayer.R
-import kartollika.vkeducation.audioplayer.data.models.AudioTrack
+import kartollika.vkeducation.audioplayer.player.AudioTrack
 
 class AudioTrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
