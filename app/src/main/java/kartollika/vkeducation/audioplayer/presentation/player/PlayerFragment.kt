@@ -1,4 +1,4 @@
-package kartollika.vkeducation.audioplayer.views.player_view
+package kartollika.vkeducation.audioplayer.presentation.player
 
 import android.content.ComponentName
 import android.content.Context
@@ -17,7 +17,7 @@ import kartollika.vkeducation.audioplayer.common.views.AudioTracksCarouselRecycl
 import kartollika.vkeducation.audioplayer.common.views.audio_seekbar.AudioSeekbar
 import kartollika.vkeducation.audioplayer.data.models.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
-import kartollika.vkeducation.audioplayer.views.player_view.tracks_list.AudioTracksAdapter
+import kartollika.vkeducation.audioplayer.presentation.player.tracks_list.AudioTracksAdapter
 import kotlinx.android.synthetic.main.fragment_audioplayer.view.*
 
 class PlayerFragment : Fragment() {

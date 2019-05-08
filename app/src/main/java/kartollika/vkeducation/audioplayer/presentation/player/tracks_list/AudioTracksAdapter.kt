@@ -1,4 +1,4 @@
-package kartollika.vkeducation.audioplayer.views.player_view.tracks_list
+package kartollika.vkeducation.audioplayer.presentation.player.tracks_list
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater

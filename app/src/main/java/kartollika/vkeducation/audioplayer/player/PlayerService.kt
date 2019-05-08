@@ -11,9 +11,7 @@ import com.google.android.exoplayer2.ExoPlayerFactory
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
-import com.google.android.exoplayer2.source.TrackGroupArray
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
-import com.google.android.exoplayer2.trackselection.TrackSelectionArray
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
@@ -112,14 +110,9 @@ class PlayerService : Service() {
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelection)
         val dataSourceFactory = DefaultDataSourceFactory(this, Util.getUserAgent(this, "test_name"))
 
-        exoPlayer.addListener(object : Player.EventListener {
-            override fun onTracksChanged(
-                trackGroups: TrackGroupArray?, trackSelections: TrackSelectionArray?) {
-                super.onTracksChanged(trackGroups, trackSelections)
-            }
-        })
+        exoPlayer.addListener(object : Player.EventListener {})
 
-        mediaSource.clear()
+        reloadTracks()
         for (track in audioTracks) {
             mediaSource.addMediaSource(
                 ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(track.uri)

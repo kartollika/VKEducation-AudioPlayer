@@ -1,26 +1,33 @@
-package kartollika.vkeducation.audioplayer.views.main_screen
+package kartollika.vkeducation.audioplayer.presentation.main_screen
 
+import android.Manifest
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.os.IBinder
 import android.provider.MediaStore
+import android.provider.Settings
 import android.support.design.widget.BottomSheetBehavior
+import android.support.v4.app.ActivityCompat
 import android.support.v4.app.LoaderManager
+import android.support.v4.content.ContextCompat
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
+import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
 import kartollika.vkeducation.audioplayer.data.models.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
-import kartollika.vkeducation.audioplayer.views.player_view.FloatingBottomPlayer
+import kartollika.vkeducation.audioplayer.presentation.player.FloatingBottomPlayer
 import kotlinx.android.synthetic.main.activity_main.*
+
 
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
     LoaderManager.LoaderCallbacks<Cursor> {
@@ -61,7 +68,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
             }
         })
 
-        if (!isPlayerBounded) {
+        if (!isPlayerBounded && isStoragePermissionGranted()) {
             bindPlayerService()
         }
     }
@@ -86,28 +93,30 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 9999) {
-            if (resultCode == Activity.RESULT_OK) {
-                if (data == null) {
-                    return
+        when (requestCode) {
+            9999 -> {
+                super.onActivityResult(requestCode, resultCode, data)
+
+                if (resultCode == Activity.RESULT_OK) {
+                    if (data == null) {
+                        return
+                    }
+
+                    val filePath = data!!.data.path
+                    val fileName = data!!.data.lastPathSegment
+                    val lastPos = filePath.length - fileName.length
+                    val folder = filePath.substring(0, lastPos)
+                    val folderName: String =
+                        data.data.pathSegments[data.data.pathSegments.lastIndex - 1] ?: ""
+                    PreferencesUtils(this).saveLastPlayedDirectory(folder)
+
+                    LoaderManager.getInstance(this)
+                        .initLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
                 }
-
-                val filePath = data!!.data.path
-                val fileName = data!!.data.lastPathSegment
-                val lastPos = filePath.length - fileName.length
-                val folder = filePath.substring(0, lastPos)
-                val folderName: String =
-                    data.data.pathSegments[data.data.pathSegments.lastIndex - 1] ?: ""
-                PreferencesUtils(this).saveLastPlayedDirectory(folder)
-
-                LoaderManager.getInstance(this)
-                    .initLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
             }
-//            Log.d("files_test", filePath)
-//            Log.d("files_test", folder)
-//            Log.d("files_test", fileName)
-//            loadAudiosFrom(folderName)
-//            loadAudiosFrom(data?.data)
+            101 -> {
+                checkStoragePermission()
+            }
         }
     }
 
@@ -128,8 +137,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
     override fun onLoadFinished(p0: Loader<Cursor>, p1: Cursor?) {
         playerService?.invalidateTracks()
         playerService?.playMusic()
-        //        val tracks = parseAudioTracks(cursor)
-//        playerService.invalidatePlayer()
     }
 
     override fun onLoaderReset(p0: Loader<Cursor>) {
@@ -168,4 +175,70 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
         }
         return tracks
     }
+
+    override fun checkStoragePermission() {
+        if (isStoragePermissionGranted()) {
+            presenter.onOpenFolderStoragePermissionGranted()
+        } else {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(
+                    this, Manifest.permission.READ_EXTERNAL_STORAGE
+                )
+            ) {
+                AlertDialog.Builder(this).setTitle("Разрешение")
+                    .setMessage("Для выбора разделя для проигрывания аудио необходимо предоставить разрешение приложению")
+                    .setPositiveButton("Ok") { _, _ ->
+                        run {
+                            ActivityCompat.requestPermissions(
+                                this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 100
+                            )
+                        }
+                    }.create().show()
+            } else {
+                ActivityCompat.requestPermissions(
+                    this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 100
+                )
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == 100 && grantResults.size == 1) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                presenter.onOpenFolderStoragePermissionGranted()
+                bindPlayerService()
+            }
+
+            if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                        this, Manifest.permission.READ_EXTERNAL_STORAGE
+                    )
+                ) {
+                    createStoragePermissionDialog().show()
+                }
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    private fun isStoragePermissionGranted(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            this, Manifest.permission.READ_EXTERNAL_STORAGE
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun createStoragePermissionDialog(): AlertDialog {
+        return AlertDialog.Builder(this).setTitle("Разрешение")
+            .setMessage("Для выбора разделя для проигрывания аудио необходимо вручную предоставить разрешение приложению")
+            .setPositiveButton("Настройки") { _, _ -> openApplicationSettings(101) }
+            .setNegativeButton("Отмена") { dialog, _ -> dialog.dismiss() }.create()
+    }
+
+    private fun openApplicationSettings(requestCode: Int) {
+        val appSettingsIntent = Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$packageName")
+        )
+        startActivityForResult(appSettingsIntent, requestCode)
+    }
+
 }
