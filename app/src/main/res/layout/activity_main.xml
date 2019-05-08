@@ -36,7 +36,7 @@
                 android:textSize="14sp" />
 
             <Button
-                android:id="@+id/open_folder_button"
+                android:id="@+id/openFolderActionView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
@@ -54,7 +54,7 @@
     </FrameLayout>
 
     <kartollika.vkeducation.audioplayer.presentation.player.FloatingBottomPlayer
-        android:id="@+id/floating_player"
+        android:id="@+id/floatingBottomPlayerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="android.support.design.widget.BottomSheetBehavior" />

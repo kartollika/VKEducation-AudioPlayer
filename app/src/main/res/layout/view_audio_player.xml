@@ -9,18 +9,18 @@
     android:focusableInTouchMode="false">
 
     <include
-        android:id="@+id/view_mini_player"
+        android:id="@+id/playerMiniContainerView"
         layout="@layout/view_mini_player"
         android:visibility="gone" />
 
     <LinearLayout
-        android:id="@+id/bottom_sheet_container"
+        android:id="@+id/playerFullContainerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
 
         <ImageView
-            android:id="@+id/bottom_sheet_hide_arrow"
+            android:id="@+id/bottomSheetHideView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
@@ -29,7 +29,7 @@
             android:src="@drawable/dropdown_24" />
 
         <FrameLayout
-            android:id="@+id/player_container"
+            android:id="@+id/audioPlayerContainerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 

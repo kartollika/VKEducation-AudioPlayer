@@ -21,8 +21,6 @@ class FloatingBottomPlayer(
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private val callbacks: MutableList<BottomSheetBehavior.BottomSheetCallback> = mutableListOf()
-    private lateinit var miniPlayer: View
-    private lateinit var fullPlayer: View
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
 
@@ -56,10 +54,7 @@ class FloatingBottomPlayer(
             this.layoutParams = layoutParams
         })
 
-        miniPlayer = view_mini_player
-        fullPlayer = bottom_sheet_container
-
-        bottom_sheet_hide_arrow.setOnClickListener {
+        bottomSheetHideView.setOnClickListener {
             if (getSheetState() == BottomSheetBehavior.STATE_EXPANDED) {
                 collapseSheet()
             } else {
@@ -71,7 +66,7 @@ class FloatingBottomPlayer(
     fun initPlayerFragment(fragmentManager: FragmentManager) {
         fragmentManager
             .beginTransaction()
-            .replace(R.id.player_container, PlayerFragment())
+            .replace(R.id.audioPlayerContainerView, PlayerFragment())
             .commit()
 
         initSmoothAnimations()
@@ -80,17 +75,17 @@ class FloatingBottomPlayer(
     private fun initSmoothAnimations() {
         addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(p0: View, offset: Float) {
-                miniPlayer.alpha = 1 - 1 / 0.3f * offset
-                fullPlayer.alpha =
+                playerMiniContainerView.alpha = 1 - 1 / 0.3f * offset
+                playerFullContainerView.alpha =
                     Math.min(1 / 0.3f * offset - 1 - offset, 1f)
             }
 
             override fun onStateChanged(p0: View, state: Int) {
             }
         })
-        fullPlayer.visibility = View.VISIBLE
-        miniPlayer.visibility = View.VISIBLE
-        fullPlayer.alpha = 0f
+        playerFullContainerView.visibility = View.VISIBLE
+        playerMiniContainerView.visibility = View.VISIBLE
+        playerFullContainerView.alpha = 0f
     }
 
     fun addCallback(callback: BottomSheetBehavior.BottomSheetCallback) {
