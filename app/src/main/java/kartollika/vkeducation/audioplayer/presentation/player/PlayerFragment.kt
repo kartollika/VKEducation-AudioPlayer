@@ -10,17 +10,22 @@ import android.support.v4.app.Fragment
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.support.v7.widget.PagerSnapHelper
+import android.support.v7.widget.LinearSnapHelper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.ui.PlayerView
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.common.mocks.getAudioTracksMocks
 import kartollika.vkeducation.audioplayer.common.views.AudioTracksCarouselRecyclerView
+import kartollika.vkeducation.audioplayer.common.views.SnapOnScrollListener
+import kartollika.vkeducation.audioplayer.common.views.attachSnapHelperWithListener
 import kartollika.vkeducation.audioplayer.common.views.audio_seekbar.AudioSeekbar
 import kartollika.vkeducation.audioplayer.player.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.presentation.player.tracks_list.AudioTracksAdapter
+import kotlinx.android.synthetic.main.fragment_audioplayer.*
 import kotlinx.android.synthetic.main.fragment_audioplayer.view.*
 
 
@@ -31,9 +36,11 @@ class PlayerFragment : Fragment() {
     private lateinit var previousTrackActionView: View
     private lateinit var optionsActionView: View
     private lateinit var shuffleTracksActionView: View
+    private lateinit var pauseResumeActionView: View
     private lateinit var tracksRecyclerView: AudioTracksCarouselRecyclerView
     private lateinit var tracksAdapter: AudioTracksAdapter
     private lateinit var playerService: PlayerService
+    private lateinit var playerView: PlayerView
     private var isPlayerBounded = false
     private lateinit var mediaController: MediaControllerCompat
 
@@ -54,6 +61,12 @@ class PlayerFragment : Fragment() {
             mediaController.registerCallback(object : MediaControllerCompat.Callback() {})
             isPlayerBounded = true
             initializeInitialState()
+
+            playerService.addOnPlayerInitListener(object : PlayerService.OnPlayerInitListener {
+                override fun onPlayerInit(player: ExoPlayer) {
+                    exo_controllers.player = player
+                }
+            })
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -78,12 +91,35 @@ class PlayerFragment : Fragment() {
         nextTrackActionView = view.next_track_view
         tracksRecyclerView = view.tracks_recyclerview
 
+        initTracksRecyclerView()
+        initListeners()
+        return view
+    }
+
+    private fun initTracksRecyclerView() {
         tracksAdapter = AudioTracksAdapter(getAudioTracksMocks())
         tracksRecyclerView.setupAdapter(tracksAdapter)
-        PagerSnapHelper().apply {
+        tracksRecyclerView.attachSnapHelperWithListener(LinearSnapHelper().apply {
             attachToRecyclerView(tracksRecyclerView)
-        }
-        return view
+        },
+            SnapOnScrollListener.Behavior.NOTIFY_ON_SCROLL_IDLE,
+            object : SnapOnScrollListener.OnSnapPositionChangeListener {
+                override fun onSnapPositionChange(position: Int) {
+                }
+            })
+
+    }
+
+    private fun initListeners() {
+//        previousTrackActionView.setOnClickListener { playerService.previousTrack() }
+//        nextTrackActionView.setOnClickListener { playerService.nextTrack() }
+//        pauseResumeActionView.setOnClickListener {
+//            if (playerService.isNowPlaying()) {
+//                playerService.pauseMusic()
+//            } else {
+//                playerService.resumeMusic()
+//            }
+//        }
     }
 
     fun initializeInitialState() {

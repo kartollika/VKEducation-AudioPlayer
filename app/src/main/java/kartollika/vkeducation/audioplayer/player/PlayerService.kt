@@ -13,6 +13,8 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ExoPlayerFactory
+import android.provider.MediaStore
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
@@ -147,6 +149,10 @@ class PlayerService : Service() {
         fun onTracksChanged(tracks: List<AudioTrack>)
     }
 
+    interface OnPlayerInitListener {
+        fun onPlayerInit(player: ExoPlayer)
+    }
+
     override fun onBind(intent: Intent?): IBinder? = binder
 
     override fun onCreate() {
@@ -164,20 +170,24 @@ class PlayerService : Service() {
         mediaSession.release()
     }
 
-    /* fun playMusic() {
-         exoPlayer.playWhenReady = true
+    /* fun resumeMusic() {
+         exoPlayer?.playWhenReady = true
      }
  */
     /*fun pauseMusic() {
-        exoPlayer.playWhenReady = false
+        exoPlayer?.playWhenReady = false
     }
 
     fun nextTrack() {
-        exoPlayer.next()
+        exoPlayer?.next()
     }
 
     fun previousTrack() {
         exoPlayer?.previous()
+    }
+
+    fun isNowPlaying(): Boolean {
+        return exoPlayer?.playbackState == Player.STATE_READY && exoPlayer?.playWhenReady!!
     }
 
     fun isNowPlaying(): Boolean {
@@ -191,6 +201,13 @@ class PlayerService : Service() {
 
     fun addOnTracksChangedListener(tracksChangesListener: OnTracksChangesListener) {
         this.onTracksChangesListener = tracksChangesListener
+    }
+
+    fun addOnPlayerInitListener(listener: OnPlayerInitListener) {
+        if (exoPlayer != null) {
+            listener.onPlayerInit(exoPlayer!!)
+        }
+        this.onPlayerInitListener = listener
     }
 
     fun getActiveTracks(): List<AudioTrack> = playerRepository.audioTracks
@@ -277,8 +294,8 @@ class PlayerService : Service() {
             )
         }
 
-        exoPlayer.prepare(mediaSource)
-        playMusic()*/
+        (exoPlayer as SimpleExoPlayer).prepare(mediaSource)
+        resumeMusic()*/
     }
 
     fun startPlay() {
@@ -294,7 +311,7 @@ class PlayerService : Service() {
                 ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(track.uri)
             )
         }
-        exoPlayer.prepare(mediaSource)
+        exoPlayer?.prepare(mediaSource)
     }
 */
 

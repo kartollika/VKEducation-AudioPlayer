@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -15,14 +16,14 @@
         android:nestedScrollingEnabled="false"
         android:overScrollMode="never" />
 
-    <kartollika.vkeducation.audioplayer.common.views.audio_seekbar.AudioSeekbar
-        android:id="@+id/audio_seekbar_view"
+    <com.google.android.exoplayer2.ui.PlayerControlView
+        android:id="@+id/exo_controllers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginBottom="16dp"
-        android:clickable="true" />
+        app:controller_layout_id="@layout/player_controls"
+        app:show_timeout="0">
+
+    </com.google.android.exoplayer2.ui.PlayerControlView>
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -38,7 +39,7 @@
             android:src="@drawable/ic_mini_player_next_28" />
 
         <ImageView
-            android:id="@+id/pause_track_view"
+            android:id="@+id/exo_play"
             android:layout_width="72dp"
             android:layout_height="72dp"
             android:layout_marginLeft="42dp"
