@@ -10,8 +10,8 @@ import kartollika.vkeducation.audioplayer.data.models.AudioTrack
 class AudioTrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     private lateinit var previewImage: ImageView
-    private var artistNameTextView: TextView = itemView.findViewById(R.id.artist_name_textview)
-    private var songNameTextView: TextView = itemView.findViewById(R.id.song_name_textview)
+    private var artistNameTextView: TextView = itemView.findViewById(R.id.artistNameTextView)
+    private var songNameTextView: TextView = itemView.findViewById(R.id.songNameTextView)
 
     fun bind(audioTrack: AudioTrack) {
         artistNameTextView.text = audioTrack.artist
