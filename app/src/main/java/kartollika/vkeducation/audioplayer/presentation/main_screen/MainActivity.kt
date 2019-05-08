@@ -136,7 +136,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
 
     override fun onLoadFinished(p0: Loader<Cursor>, p1: Cursor?) {
         playerService?.invalidateTracks()
-        playerService?.playMusic()
+        playerService?.resumeMusic()
     }
 
     override fun onLoaderReset(p0: Loader<Cursor>) {

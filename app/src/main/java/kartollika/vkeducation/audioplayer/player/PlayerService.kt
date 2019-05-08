@@ -6,9 +6,7 @@ import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
 import android.provider.MediaStore
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
@@ -21,16 +19,23 @@ import kartollika.vkeducation.audioplayer.data.models.AudioTrack
 class PlayerService : Service() {
 
     private var binder: Binder = AudioPlayerBinder()
-    private lateinit var exoPlayer: ExoPlayer
+    private var exoPlayer: ExoPlayer? = null
     private val audioTracks: MutableList<AudioTrack> = mutableListOf()
     private var lastPlayedDirectory: String = ""
     private var lastPlayedPosition = -1
     private val preferencesUtils = PreferencesUtils(this)
     private var mediaSource: ConcatenatingMediaSource = ConcatenatingMediaSource()
     private var onTracksChangesListener: OnTracksChangesListener? = null
+    private var onPlayerInitListener: OnPlayerInitListener? = null
+
+    private var isCurrentlyPlaying = false
 
     interface OnTracksChangesListener {
         fun onTracksChanged(tracks: List<AudioTrack>)
+    }
+
+    interface OnPlayerInitListener {
+        fun onPlayerInit(player: ExoPlayer)
     }
 
     override fun onBind(intent: Intent?): IBinder? = binder
@@ -41,20 +46,24 @@ class PlayerService : Service() {
         return START_STICKY
     }
 
-    fun playMusic() {
-        exoPlayer.playWhenReady = true
+    fun resumeMusic() {
+        exoPlayer?.playWhenReady = true
     }
 
     fun pauseMusic() {
-        exoPlayer.playWhenReady = false
+        exoPlayer?.playWhenReady = false
     }
 
     fun nextTrack() {
-        exoPlayer.next()
+        exoPlayer?.next()
     }
 
     fun previousTrack() {
-        exoPlayer.previous()
+        exoPlayer?.previous()
+    }
+
+    fun isNowPlaying(): Boolean {
+        return exoPlayer?.playbackState == Player.STATE_READY && exoPlayer?.playWhenReady!!
     }
 
     fun invalidateTracks() {
@@ -64,6 +73,13 @@ class PlayerService : Service() {
 
     fun addOnTracksChangedListener(tracksChangesListener: OnTracksChangesListener) {
         this.onTracksChangesListener = tracksChangesListener
+    }
+
+    fun addOnPlayerInitListener(listener: OnPlayerInitListener) {
+        if (exoPlayer != null) {
+            listener.onPlayerInit(exoPlayer!!)
+        }
+        this.onPlayerInitListener = listener
     }
 
     fun getActiveTracks(): List<AudioTrack> = audioTracks.toList()
@@ -110,7 +126,15 @@ class PlayerService : Service() {
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelection)
         val dataSourceFactory = DefaultDataSourceFactory(this, Util.getUserAgent(this, "test_name"))
 
-        exoPlayer.addListener(object : Player.EventListener {})
+        (exoPlayer as SimpleExoPlayer).addListener(object : Player.EventListener {
+            override fun onTimelineChanged(timeline: Timeline?, manifest: Any?, reason: Int) {
+                super.onTimelineChanged(timeline, manifest, reason)
+            }
+
+            override fun onPositionDiscontinuity(reason: Int) {
+                super.onPositionDiscontinuity(reason)
+            }
+        })
 
         reloadTracks()
         for (track in audioTracks) {
@@ -119,8 +143,8 @@ class PlayerService : Service() {
             )
         }
 
-        exoPlayer.prepare(mediaSource)
-        playMusic()
+        (exoPlayer as SimpleExoPlayer).prepare(mediaSource)
+        resumeMusic()
     }
 
     private fun reloadExoPlayer() {
@@ -131,7 +155,7 @@ class PlayerService : Service() {
                 ExtractorMediaSource.Factory(dataSourceFactory).createMediaSource(track.uri)
             )
         }
-        exoPlayer.prepare(mediaSource)
+        exoPlayer?.prepare(mediaSource)
     }
 
     inner class AudioPlayerBinder : Binder() {
