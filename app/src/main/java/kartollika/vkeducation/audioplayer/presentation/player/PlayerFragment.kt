@@ -90,10 +90,10 @@ class PlayerFragment : Fragment() {
     }
 
     private fun initListeners() {
-        previousTrackActionView.setOnClickListener {  }
-        nextTrackActionView.setOnClickListener {  }
-        pauseActionView.setOnClickListener {  }
-        playActionView.setOnClickListener {  }
+        previousTrackActionView.setOnClickListener { mediaController.transportControls.skipToPrevious() }
+        nextTrackActionView.setOnClickListener { mediaController.transportControls.skipToNext() }
+        pauseActionView.setOnClickListener { mediaController.transportControls.pause() }
+        playActionView.setOnClickListener { mediaController.transportControls.play() }
     }
 
     fun initializeInitialState() {
