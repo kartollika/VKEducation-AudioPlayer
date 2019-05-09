@@ -23,6 +23,8 @@ class PlayerRepository {
         return audioTracks[currentAudioIndex]
     }
 
+    fun getCurrentIndex() = currentAudioIndex
+
     fun skipTo(newCurrentIndex: Long) {
         currentAudioIndex = newCurrentIndex.toInt()
     }

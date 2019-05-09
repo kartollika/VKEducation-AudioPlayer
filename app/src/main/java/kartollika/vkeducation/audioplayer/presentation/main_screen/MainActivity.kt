@@ -23,7 +23,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import kartollika.vkeducation.audioplayer.player.AudioTrack
-import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -74,20 +73,14 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         savedInstanceState.putBoolean("ServiceState", isPlayerBounded)
+        savedInstanceState.putString("LastPlayedPath", lastPlayedPath)
         super.onSaveInstanceState(savedInstanceState)
     }
 
     public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         isPlayerBounded = savedInstanceState.getBoolean("ServiceState")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (isPlayerBounded) {
-            unbindService(serviceConnection)
-            playerService?.stopSelf()
-        }
+        lastPlayedPath = savedInstanceState.getString("LastPlayedPath") ?: ""
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -107,14 +100,10 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
                     val folder = filePath.substring(0, lastPos)
 
                     lastPlayedPath = folder
-                    if (audioLoader == null) {
-                        audioLoader = LoaderManager.getInstance(this)
-                            .initLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
-                    } else {
-                        LoaderManager.getInstance(this)
-                            .restartLoader(taskId, Bundle.EMPTY, this@MainActivity)
-                    }
-//                    playerService?.setSourceUri(Uri.parse(folder))
+                    LoaderManager.getInstance(this).restartLoader(1451, null, this@MainActivity)
+//                    LoaderManager.getInstance(this).restartLoader(
+//                        1451, null, this@MainActivity
+//                    )
                 }
             }
             101 -> {
@@ -155,8 +144,10 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
             )
         }
 
-        playerService?.reloadTracks(tracks)
-        playerService?.startPlay()
+        if (tracks != playerService?.getActiveTracks()) {
+            playerService?.reloadTracks(lastPlayedPath, tracks)
+            playerService?.startPlay()
+        }
     }
 
     override fun onLoaderReset(p0: Loader<Cursor>) {
