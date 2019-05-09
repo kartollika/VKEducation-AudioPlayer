@@ -23,7 +23,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
-import kartollika.vkeducation.audioplayer.data.models.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.presentation.folder_chooser.FolderChooserActivity
 import kartollika.vkeducation.audioplayer.presentation.player.FloatingBottomPlayer
@@ -34,7 +33,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
     LoaderManager.LoaderCallbacks<Cursor> {
 
     private lateinit var presenter: MainActivityPresenter
-    private lateinit var floationBottomPlayer: FloatingBottomPlayer
 
     private var playerService: PlayerService? = null
     private var isPlayerBounded = false
@@ -54,13 +52,12 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
         super.onCreate(savedInstanceState)
         setContentView(kartollika.vkeducation.audioplayer.R.layout.activity_main)
 
-        open_folder_button.setOnClickListener {
+        openFolderActionView.setOnClickListener {
             presenter.onOpenFolderAction()
         }
 
-        floationBottomPlayer = floating_player
-        floationBottomPlayer.initPlayerFragment(supportFragmentManager)
-        floationBottomPlayer.addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+        floatingBottomPlayerView.initPlayerFragment(supportFragmentManager)
+        floatingBottomPlayerView.addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(p0: View, p1: Float) {
 
             }
@@ -127,7 +124,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
 
     override fun onLoadFinished(p0: Loader<Cursor>, p1: Cursor?) {
         playerService?.invalidateTracks()
-        playerService?.playMusic()
+        playerService?.resumeMusic()
     }
 
     override fun onLoaderReset(p0: Loader<Cursor>) {
@@ -147,25 +144,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
     }
 
     private fun getPlayerServiceIntent() = Intent(this, PlayerService::class.java)
-
-    private fun parseAudioTracks(cursor: Cursor?): List<AudioTrack> {
-        val tracks = mutableListOf<AudioTrack>()
-        cursor?.let {
-            while (cursor.moveToNext()) {
-                val data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                val artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-                val title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-                val length = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-
-                tracks.add(
-                    AudioTrack(
-                        artist = artist, title = title, howLong = length, uri = Uri.parse(data)
-                    )
-                )
-            }
-        }
-        return tracks
-    }
 
     override fun checkStoragePermission() {
         if (isStoragePermissionGranted()) {
