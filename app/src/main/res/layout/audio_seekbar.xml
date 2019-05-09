@@ -8,12 +8,13 @@
         android:id="@+id/exo_progress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:bar_height="1dp"
-        app:buffered_color="#FFFFFFFF"
+        app:bar_height="3dp"
+        app:buffered_color="@color/kashmir_blue_alpha_12"
         app:layout_constraintTop_toTopOf="parent"
-        app:played_color="@color/colorAccent"
-        app:scrubber_color="#FF5D29C1"
-        app:unplayed_color="#FFFFFFFF" />
+        app:played_color="@color/dodger_blue"
+        app:scrubber_color="@color/havelock_blue"
+        app:scrubber_enabled_size="11dp"
+        app:unplayed_color="@color/kashmir_blue_alpha_12" />
 
     <TextView
         android:id="@+id/exo_position"

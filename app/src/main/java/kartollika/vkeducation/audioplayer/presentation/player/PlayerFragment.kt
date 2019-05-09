@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.exoplayer2.ExoPlayer
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.common.mocks.getAudioTracksMocks
 import kartollika.vkeducation.audioplayer.common.views.SnapOnScrollListener
@@ -68,11 +69,16 @@ class PlayerFragment : Fragment() {
             mediaController.registerCallback(mediaControllerCallback)
             isPlayerBounded = true
             initializeInitialState()
+            initExoplayerStaff(playerService.getExoPlayer())
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
             isPlayerBounded = false
         }
+    }
+
+    private fun initExoplayerStaff(exoPlayer: ExoPlayer?) {
+        exo_controllers.player = exoPlayer
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -22,11 +22,9 @@ import android.support.v4.content.Loader
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
 import kartollika.vkeducation.audioplayer.player.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.presentation.folder_chooser.FolderChooserActivity
-import kartollika.vkeducation.audioplayer.presentation.player.FloatingBottomPlayer
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -94,9 +92,9 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
 
                 if (resultCode == Activity.RESULT_OK) {
                     val folder = data?.getStringExtra("chosen_folder") ?: return
-                    PreferencesUtils(this).saveLastPlayedDirectory(folder)
+                    lastPlayedPath = folder
                     LoaderManager.getInstance(this)
-                        .initLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
+                        .restartLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
                 }
             }
             101 -> {
