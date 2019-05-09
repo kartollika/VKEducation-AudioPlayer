@@ -1,4 +1,4 @@
-package kartollika.vkeducation.audioplayer.data.models
+package kartollika.vkeducation.audioplayer.player
 
 import android.net.Uri
 
@@ -8,4 +8,4 @@ data class AudioTrack(
     val howLong: Int = 0,
     val isExplicit: Boolean = false,
     val uri: Uri = Uri.parse(""),
-    val albumArt: String = "")
+    val albumArt: Uri = Uri.parse(""))
