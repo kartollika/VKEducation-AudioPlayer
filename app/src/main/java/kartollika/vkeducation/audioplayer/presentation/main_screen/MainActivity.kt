@@ -22,8 +22,11 @@ import android.support.v4.content.Loader
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
 import kartollika.vkeducation.audioplayer.player.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
+import kartollika.vkeducation.audioplayer.presentation.folder_chooser.FolderChooserActivity
+import kartollika.vkeducation.audioplayer.presentation.player.FloatingBottomPlayer
 import kotlinx.android.synthetic.main.activity_main.*
 
 
@@ -90,20 +93,10 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
                 super.onActivityResult(requestCode, resultCode, data)
 
                 if (resultCode == Activity.RESULT_OK) {
-                    if (data == null) {
-                        return
-                    }
-
-                    val filePath = data!!.data.path
-                    val fileName = data!!.data.lastPathSegment
-                    val lastPos = filePath.length - fileName.length
-                    val folder = filePath.substring(0, lastPos)
-
-                    lastPlayedPath = folder
-                    LoaderManager.getInstance(this).restartLoader(1451, null, this@MainActivity)
-//                    LoaderManager.getInstance(this).restartLoader(
-//                        1451, null, this@MainActivity
-//                    )
+                    val folder = data?.getStringExtra("chosen_folder") ?: return
+                    PreferencesUtils(this).saveLastPlayedDirectory(folder)
+                    LoaderManager.getInstance(this)
+                        .initLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
                 }
             }
             101 -> {
@@ -113,7 +106,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
     }
 
     override fun openFolderSelectView() {
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
+        val intent = Intent(this, FolderChooserActivity::class.java)
         startActivityForResult(intent, 9999)
     }
 
