@@ -22,7 +22,7 @@ import android.support.v4.content.Loader
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
+import kartollika.vkeducation.audioplayer.player.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -31,9 +31,11 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
     LoaderManager.LoaderCallbacks<Cursor> {
 
     private lateinit var presenter: MainActivityPresenter
-
+    private var lastPlayedPath: String = ""
+    private var audioLoader: Loader<*>? = null
     private var playerService: PlayerService? = null
     private var isPlayerBounded = false
+
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             playerService = (binder as PlayerService.AudioPlayerBinder).getService()
@@ -71,20 +73,14 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         savedInstanceState.putBoolean("ServiceState", isPlayerBounded)
+        savedInstanceState.putString("LastPlayedPath", lastPlayedPath)
         super.onSaveInstanceState(savedInstanceState)
     }
 
     public override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
         isPlayerBounded = savedInstanceState.getBoolean("ServiceState")
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        if (isPlayerBounded) {
-            unbindService(serviceConnection)
-            playerService?.stopSelf()
-        }
+        lastPlayedPath = savedInstanceState.getString("LastPlayedPath") ?: ""
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -102,12 +98,12 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
                     val fileName = data!!.data.lastPathSegment
                     val lastPos = filePath.length - fileName.length
                     val folder = filePath.substring(0, lastPos)
-                    val folderName: String =
-                        data.data.pathSegments[data.data.pathSegments.lastIndex - 1] ?: ""
-                    PreferencesUtils(this).saveLastPlayedDirectory(folder)
 
-                    LoaderManager.getInstance(this)
-                        .initLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
+                    lastPlayedPath = folder
+                    LoaderManager.getInstance(this).restartLoader(1451, null, this@MainActivity)
+//                    LoaderManager.getInstance(this).restartLoader(
+//                        1451, null, this@MainActivity
+//                    )
                 }
             }
             101 -> {
@@ -122,17 +118,36 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
     }
 
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-        val lastDirectory = PreferencesUtils(this).getLastPlayedDirectory()
         val uriQuery = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val selection =
             MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DATA + " like ?"
-        val selectionArgs = arrayOf("%$lastDirectory%")
+        val selectionArgs = arrayOf("%$lastPlayedPath%")
         return CursorLoader(this, uriQuery, null, selection, selectionArgs, null)
     }
 
-    override fun onLoadFinished(p0: Loader<Cursor>, p1: Cursor?) {
-        playerService?.invalidateTracks()
-        playerService?.resumeMusic()
+    override fun onLoadFinished(p0: Loader<Cursor>, cursor: Cursor?) {
+        val tracks = mutableListOf<AudioTrack>()
+        if (cursor == null) {
+            return
+        }
+
+        while (cursor.moveToNext()) {
+            val data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+            val artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
+            val title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+            val length = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
+
+            tracks.add(
+                AudioTrack(
+                    artist = artist, title = title, howLong = length, uri = Uri.parse(data)
+                )
+            )
+        }
+
+        if (tracks != playerService?.getActiveTracks()) {
+            playerService?.reloadTracks(lastPlayedPath, tracks)
+            playerService?.startPlay()
+        }
     }
 
     override fun onLoaderReset(p0: Loader<Cursor>) {

@@ -46,7 +46,7 @@
             android:layout_marginRight="42dp"
             android:background="@drawable/standart_circle_button_gradient"
             android:padding="12dp"
-            android:src="@drawable/ic_pause_48" />
+            android:src="@drawable/ic_play_48" />
 
         <ImageView
             android:id="@+id/pauseActionView"
