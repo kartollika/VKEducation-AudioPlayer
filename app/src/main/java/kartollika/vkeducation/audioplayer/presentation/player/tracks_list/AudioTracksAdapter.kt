@@ -4,7 +4,7 @@ import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import kartollika.vkeducation.audioplayer.R
-import kartollika.vkeducation.audioplayer.data.models.AudioTrack
+import kartollika.vkeducation.audioplayer.player.AudioTrack
 
 class AudioTracksAdapter(var audioTracks: List<AudioTrack>) :
     RecyclerView.Adapter<AudioTrackViewHolder>() {
