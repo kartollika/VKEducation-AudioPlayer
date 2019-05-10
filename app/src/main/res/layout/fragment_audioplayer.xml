@@ -18,18 +18,54 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="16dp"
             android:clipToPadding="false"
             android:nestedScrollingEnabled="false"
-            android:overScrollMode="never">
+            android:overScrollMode="never" />
 
-        </kartollika.vkeducation.audioplayer.common.views.AudioTracksCarouselRecyclerView>
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="36dp"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/artistNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="@dimen/default_half_horizontal_margin"
+                android:fontFamily="@font/roboto_medium"
+                android:textAlignment="center"
+                android:textSize="24sp" />
+
+            <ImageView
+                android:id="@+id/explicitSongLogoView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/artistNameTextView"
+                android:layout_toRightOf="@id/artistNameTextView"
+                android:baselineAlignBottom="true"
+                android:src="@drawable/ic_explicit" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/songNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:fontFamily="@font/roboto"
+            android:textAlignment="center"
+            android:textColor="#528bcc"
+            android:textSize="16sp" />
 
         <com.google.android.exoplayer2.ui.PlayerControlView
+
             android:id="@+id/exo_controllers"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/default_double_horizontal_margin"
+            android:layout_marginTop="16dp"
             android:layout_marginRight="@dimen/default_double_horizontal_margin"
             app:controller_layout_id="@layout/player_controls"
             app:show_timeout="0">
