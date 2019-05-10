@@ -11,7 +11,7 @@ class AudioTracksAdapter(audioTracks: List<AudioTrack>) :
 
     private val dummyView = 1
     private val dummyAudioTrack =
-        AudioTrack(title = "Треков нет. Выберите треки и приходите обратно :)")
+        AudioTrack(artist = "Треков нет", title = "Выберите треки и приходите обратно :)")
     private val defaultTrackView = 0
 
     interface OnSetTracksListener {

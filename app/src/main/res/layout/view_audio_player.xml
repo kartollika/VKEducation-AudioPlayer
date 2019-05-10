@@ -25,7 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/default_half_vertical_margin"
-            android:layout_marginBottom="@dimen/default_vertical_margin"
+            android:layout_marginBottom="@dimen/default_half_vertical_margin"
             android:src="@drawable/dropdown_24" />
 
         <FrameLayout

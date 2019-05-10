@@ -11,7 +11,7 @@ class AlphaAndZoomCentralLayoutManager(
     orientation: Int,
     reverseLayout: Boolean) : LinearLayoutManager(context, orientation, reverseLayout) {
 
-    private val mShrinkAmount = 0.15f
+    private val mShrinkAmount = 0.1f
     private val mShrinkDistance = 0.9f
     private val alphaLowerLimit = 0.5f
 
