@@ -160,6 +160,7 @@ class PlayerService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         mediaSession.release()
+        exoPlayer?.release()
     }
 
     fun addOnTracksChangedListener(tracksChangesListener: OnTracksChangesListener) {
@@ -225,9 +226,12 @@ class PlayerService : Service() {
         val trackSelection = DefaultTrackSelector()
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelection)
         exoPlayer!!.addListener(object : Player.EventListener {
+
             override fun onPositionDiscontinuity(reason: Int) {
                 super.onPositionDiscontinuity(reason)
-                exoPlayer?.currentTag
+                if (reason == Player.DISCONTINUITY_REASON_PERIOD_TRANSITION) {
+                    mediaSessionCallbacks.onSkipToNext()
+                }
             }
         })
     }

@@ -70,6 +70,7 @@ class PlayerFragment : Fragment() {
             isPlayerBounded = true
             initializeInitialState()
             initExoplayerStaff(playerService.getExoPlayer())
+            changeControlsState(playerService.getActiveTracks().isNotEmpty())
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -102,7 +103,13 @@ class PlayerFragment : Fragment() {
     }
 
     private fun initTracksRecyclerView() {
-        tracksAdapter = AudioTracksAdapter(getAudioTracksMocks())
+        tracksAdapter = AudioTracksAdapter(getAudioTracksMocks()).apply {
+            onSetAudioTracksListener = object : AudioTracksAdapter.OnSetTracksListener {
+                override fun onSet(isEmpty: Boolean) {
+                    changeControlsState(!isEmpty)
+                }
+            }
+        }
         tracksRecyclerView.setupAdapter(tracksAdapter)
         tracksRecyclerView.attachSnapHelperWithListener(LinearSnapHelper().apply {
             attachToRecyclerView(tracksRecyclerView)
@@ -110,7 +117,9 @@ class PlayerFragment : Fragment() {
             SnapOnScrollListener.Behavior.NOTIFY_ON_SCROLL_IDLE,
             object : SnapOnScrollListener.OnSnapPositionChangeListener {
                 override fun onSnapPositionChange(position: Int) {
-                    mediaController.transportControls.skipToQueueItem(position.toLong())
+                    if (playerService.getActiveTracks().isNotEmpty()) {
+                        mediaController.transportControls.skipToQueueItem(position.toLong())
+                    }
                 }
             })
     }
@@ -133,6 +142,7 @@ class PlayerFragment : Fragment() {
                 tracksAdapter.apply {
                     audioTracks = tracks
                     notifyDataSetChanged()
+                    changeControlsState(!tracks.isEmpty())
                 }
             }
         })
@@ -141,6 +151,13 @@ class PlayerFragment : Fragment() {
             audioTracks = currentTracks
             notifyDataSetChanged()
         }
+    }
+
+    fun changeControlsState(isPlaylistEmpty: Boolean) {
+        previousTrackActionView.isEnabled = isPlaylistEmpty
+        nextTrackActionView.isEnabled = isPlaylistEmpty
+        pauseActionView.isEnabled = isPlaylistEmpty
+        playActionView.isEnabled = isPlaylistEmpty
     }
 
     private fun bindPlayerService() {

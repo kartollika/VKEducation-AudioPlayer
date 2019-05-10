@@ -111,8 +111,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
     override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
         val uriQuery = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         val selection =
-            MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DATA + " like ?"
-        val selectionArgs = arrayOf("%$lastPlayedPath%")
+            MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DATA + " like ? AND " + MediaStore.Audio.Media.DATA + " NOT LIKE ? "
+        val selectionArgs = arrayOf("%$lastPlayedPath%", "%$lastPlayedPath/%/%")
         return CursorLoader(this, uriQuery, null, selection, selectionArgs, null)
     }
 
