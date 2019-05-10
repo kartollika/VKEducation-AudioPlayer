@@ -6,7 +6,7 @@ import android.support.v7.widget.RecyclerView
 import kotlin.math.sign
 
 
-class ZoomCentralLayoutManager(context: Context?, orientation: Int, reverseLayout: Boolean) :
+class AlphaAndZoomCentralLayoutManager(context: Context?, orientation: Int, reverseLayout: Boolean) :
     LinearLayoutManager(context, orientation, reverseLayout) {
 
     private val mShrinkAmount = 0.15f
