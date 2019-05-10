@@ -68,6 +68,7 @@ class PlayerFragment : Fragment() {
             mediaController.registerCallback(mediaControllerCallback)
             isPlayerBounded = true
             initializeInitialState()
+            changeControlsState(playerService.getActiveTracks().isNotEmpty())
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -127,6 +128,9 @@ class PlayerFragment : Fragment() {
                 tracksAdapter.apply {
                     audioTracks = tracks
                     notifyDataSetChanged()
+
+
+                    changeControlsState(tracks.isEmpty())
                 }
             }
         })
@@ -135,6 +139,13 @@ class PlayerFragment : Fragment() {
             audioTracks = currentTracks
             notifyDataSetChanged()
         }
+    }
+
+    fun changeControlsState(isPlaylistEmpty: Boolean) {
+        previousTrackActionView.isEnabled = isPlaylistEmpty
+        nextTrackActionView.isEnabled = isPlaylistEmpty
+        pauseActionView.isEnabled = isPlaylistEmpty
+        playActionView.isEnabled = isPlaylistEmpty
     }
 
     private fun bindPlayerService() {
