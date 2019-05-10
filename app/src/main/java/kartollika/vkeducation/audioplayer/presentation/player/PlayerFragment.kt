@@ -103,7 +103,17 @@ class PlayerFragment : Fragment() {
     }
 
     private fun initTracksRecyclerView() {
-        tracksAdapter = AudioTracksAdapter(getAudioTracksMocks())
+        tracksAdapter = AudioTracksAdapter(getAudioTracksMocks()).apply {
+            onSetAudioTracksListener = object : AudioTracksAdapter.OnSetTracksListener {
+                override fun onSet(isEmpty: Boolean) {
+                    if (isEmpty) {
+                        tracksDummyView.visibility = View.GONE
+                    } else {
+                        tracksDummyView.visibility = View.VISIBLE
+                    }
+                }
+            }
+        }
         tracksRecyclerView.setupAdapter(tracksAdapter)
         tracksRecyclerView.attachSnapHelperWithListener(LinearSnapHelper().apply {
             attachToRecyclerView(tracksRecyclerView)
