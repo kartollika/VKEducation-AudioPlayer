@@ -17,7 +17,6 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.exoplayer2.ExoPlayer
 import kartollika.vkeducation.audioplayer.R
-import kartollika.vkeducation.audioplayer.common.mocks.getAudioTracksMocks
 import kartollika.vkeducation.audioplayer.common.views.SnapOnScrollListener
 import kartollika.vkeducation.audioplayer.common.views.attachSnapHelperWithListener
 import kartollika.vkeducation.audioplayer.player.AudioTrack
@@ -105,7 +104,7 @@ class PlayerFragment : Fragment() {
     }
 
     private fun initTracksRecyclerView() {
-        tracksAdapter = AudioTracksAdapter(getAudioTracksMocks()).apply {
+        tracksAdapter = AudioTracksAdapter().apply {
             onSetAudioTracksListener = object : AudioTracksAdapter.OnSetTracksListener {
                 override fun onSet(isEmpty: Boolean) {
                     changeControlsState(!isEmpty)
