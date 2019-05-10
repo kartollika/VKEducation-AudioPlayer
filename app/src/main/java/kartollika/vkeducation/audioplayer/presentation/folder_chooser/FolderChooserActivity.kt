@@ -7,9 +7,6 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
-import android.view.View
-import android.widget.TextView
 import kotlinx.android.synthetic.main.activity_choose_folder.*
 import java.io.File
 import java.util.*
@@ -18,18 +15,13 @@ import kotlin.properties.Delegates
 
 class FolderChooserActivity : AppCompatActivity() {
 
-    private lateinit var foldersRecyclerView: RecyclerView
-    private lateinit var chooseFolderActionView: View
     private lateinit var foldersAdapter: ChooseFolderAdapter
-    private var currentFolderIndicatorView: TextView? = null
     private val roots: MutableList<String> = mutableListOf()
     private var previousBackstack: ArrayDeque<String> = ArrayDeque()
 
     private var currentFolder by Delegates.observable("") { _, _, newValue ->
         run {
-            if (currentFolderIndicatorView != null) {
-                currentFolderIndicatorView!!.text = newValue
-            }
+            currentFolderTextView?.text = newValue
         }
     }
 
@@ -38,14 +30,12 @@ class FolderChooserActivity : AppCompatActivity() {
 
         setContentView(kartollika.vkeducation.audioplayer.R.layout.activity_choose_folder)
         initStartFolders()
-        foldersRecyclerView = folders_recyclerview
-        chooseFolderActionView = choose_folder_textview
-        currentFolderIndicatorView = choose_folder_current_textview
 
         if (savedInstanceState != null) {
             currentFolder = savedInstanceState.getString("current_folder") ?: ""
             previousBackstack =
-                savedInstanceState.getSerializable("backstack") as ArrayDeque<String>? ?: ArrayDeque()
+                savedInstanceState.getSerializable("backstack") as ArrayDeque<String>?
+                    ?: ArrayDeque()
         }
 
         initFinalChooseAction()
@@ -135,7 +125,7 @@ class FolderChooserActivity : AppCompatActivity() {
             foldersAdapter.setFolders(roots)
             currentFolder = ""
         } else {
-            currentFolder = previousBackstack.peekLast()
+            currentFolder = previousBackstack.pollLast()
             foldersAdapter.setFolders(getSubDirectories(currentFolder))
         }
         foldersAdapter.notifyDataSetChanged()
