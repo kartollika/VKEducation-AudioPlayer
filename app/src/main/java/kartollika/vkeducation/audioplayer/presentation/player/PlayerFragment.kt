@@ -106,11 +106,7 @@ class PlayerFragment : Fragment() {
         tracksAdapter = AudioTracksAdapter(getAudioTracksMocks()).apply {
             onSetAudioTracksListener = object : AudioTracksAdapter.OnSetTracksListener {
                 override fun onSet(isEmpty: Boolean) {
-                    if (isEmpty) {
-                        tracksDummyView.visibility = View.GONE
-                    } else {
-                        tracksDummyView.visibility = View.VISIBLE
-                    }
+                    changeControlsState(!isEmpty)
                 }
             }
         }
@@ -121,7 +117,9 @@ class PlayerFragment : Fragment() {
             SnapOnScrollListener.Behavior.NOTIFY_ON_SCROLL_IDLE,
             object : SnapOnScrollListener.OnSnapPositionChangeListener {
                 override fun onSnapPositionChange(position: Int) {
-                    mediaController.transportControls.skipToQueueItem(position.toLong())
+                    if (playerService.getActiveTracks().isNotEmpty()) {
+                        mediaController.transportControls.skipToQueueItem(position.toLong())
+                    }
                 }
             })
     }
@@ -144,9 +142,7 @@ class PlayerFragment : Fragment() {
                 tracksAdapter.apply {
                     audioTracks = tracks
                     notifyDataSetChanged()
-
-
-                    changeControlsState(tracks.isEmpty())
+                    changeControlsState(!tracks.isEmpty())
                 }
             }
         })

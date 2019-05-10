@@ -10,46 +10,13 @@
         android:id="@+id/tracksRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center"
         android:layout_marginBottom="16dp"
         android:clipToPadding="false"
         android:nestedScrollingEnabled="false"
         android:overScrollMode="never">
 
     </kartollika.vkeducation.audioplayer.common.views.AudioTracksCarouselRecyclerView>
-
-    <android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/tracksDummyView"
-        android:layout_width="249dp"
-        android:layout_height="249dp"
-        android:layout_gravity="center_horizontal">
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:src="@drawable/ic_music_note_black_24dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="32dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginRight="32dp"
-                android:gravity="center"
-                android:text="Похоже, вы не выбрали папку, откуда играть музыку. Выберите ее на главном экране и вовзращайтесь назад :)"
-                android:textSize="14sp" />
-
-
-        </LinearLayout>
-
-    </android.support.v7.widget.CardView>
 
     <com.google.android.exoplayer2.ui.PlayerControlView
         android:id="@+id/exo_controllers"
@@ -71,6 +38,7 @@
             android:layout_width="48dp"
             android:layout_height="48dp"
             android:layout_gravity="center"
+            android:scaleX="-1"
             android:src="@drawable/ic_mini_player_next_28" />
 
         <ImageView
