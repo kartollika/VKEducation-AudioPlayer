@@ -225,6 +225,14 @@ class PlayerService : Service() {
         val trackSelection = DefaultTrackSelector()
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelection)
         exoPlayer!!.addListener(object : Player.EventListener {
+
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                super.onPlayerStateChanged(playWhenReady, playbackState)
+                if (playWhenReady && playbackState == ExoPlayer.STATE_ENDED) {
+                    mediaSessionCallbacks.onSkipToNext()
+                }
+            }
+
             override fun onPositionDiscontinuity(reason: Int) {
                 super.onPositionDiscontinuity(reason)
                 exoPlayer?.currentTag
