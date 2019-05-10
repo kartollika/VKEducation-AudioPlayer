@@ -253,4 +253,6 @@ class PlayerService : Service() {
             return mediaSession.sessionToken
         }
     }
+
+    fun getExoPlayer() = exoPlayer
 }

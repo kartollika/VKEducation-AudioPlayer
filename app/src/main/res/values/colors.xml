@@ -4,4 +4,8 @@
     <color name="colorPrimaryDark">#D8DADD</color>
     <color name="colorAccent">#D81B60</color>
     <color name="mainBackgroundColor">#EBEDF0</color>
+    <color name="havelock_blue">#3f8ae0</color>
+    <color name="dodger_blue">#2a8eff</color>
+    <color name="kashmir_blue_alpha_12">#1F45678F</color>
+
 </resources>
