@@ -54,17 +54,14 @@ class FloatingBottomPlayer(
         })
 
         bottomSheetHideView.setOnClickListener {
-            if (getSheetState() == BottomSheetBehavior.STATE_EXPANDED) {
+            if (isExpanded()) {
                 collapseSheet()
-            } else {
-                expandeSheet()
             }
         }
     }
 
     fun initPlayerFragment(fragmentManager: FragmentManager) {
-        fragmentManager.beginTransaction()
-            .replace(R.id.audioPlayerContainerView, PlayerFragment.newInstance()).commit()
+        fragmentManager.beginTransaction().replace(R.id.audioPlayerContainerView, PlayerFragment.newInstance()).commit()
 
         initSmoothAnimations()
     }
@@ -93,13 +90,15 @@ class FloatingBottomPlayer(
         callbacks.add(callback)
     }
 
-    fun getSheetState() = bottomSheetBehavior.state
+    fun isExpanded() = bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED
+
+    fun isCollapsed() = bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED
 
     fun collapseSheet() {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
     }
 
-    fun expandeSheet() {
+    fun expandSheet() {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
