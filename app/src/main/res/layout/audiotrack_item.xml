@@ -9,6 +9,7 @@
     <android.support.v7.widget.CardView
         android:layout_width="260dp"
         android:layout_height="260dp"
+        android:layout_gravity="center_horizontal"
         app:cardCornerRadius="8dp"
         app:cardElevation="4dp"
         app:cardUseCompatPadding="true">
@@ -17,7 +18,6 @@
             android:id="@+id/albumPreviewImageView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
             android:scaleType="centerCrop"
             app:srcCompat="@drawable/images" />
     </android.support.v7.widget.CardView>
@@ -26,13 +26,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
+        android:layout_marginTop="36dp"
         android:gravity="center">
 
         <TextView
             android:id="@+id/artistNameTextView"
             android:layout_width="wrap_content"
-            android:layout_marginRight="@dimen/default_half_horizontal_margin"
             android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/default_half_horizontal_margin"
             android:fontFamily="@font/roboto_medium"
             android:textAlignment="center"
             android:textSize="24sp" />
