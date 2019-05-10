@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.player.AudioTrack
 
-class AudioTracksAdapter(audioTracks: List<AudioTrack>) :
+class AudioTracksAdapter(audioTracks: List<AudioTrack> = mutableListOf()) :
     RecyclerView.Adapter<AudioTrackViewHolder>() {
 
     private val dummyView = 1
