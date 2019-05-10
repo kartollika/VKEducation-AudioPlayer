@@ -58,6 +58,8 @@ class PlayerFragment : Fragment() {
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
+            songNameTextView.text = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+            artistNameTextView.text = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
         }
     }
 
