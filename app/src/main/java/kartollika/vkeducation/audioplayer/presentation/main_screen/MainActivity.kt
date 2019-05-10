@@ -103,6 +103,14 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView,
         }
     }
 
+    override fun onBackPressed() {
+        if (floatingBottomPlayerView.isExpanded()) {
+            floatingBottomPlayerView.collapseSheet()
+            return
+        }
+        super.onBackPressed()
+    }
+
     override fun openFolderSelectView() {
         val intent = Intent(this, FolderChooserActivity::class.java)
         startActivityForResult(intent, 9999)
