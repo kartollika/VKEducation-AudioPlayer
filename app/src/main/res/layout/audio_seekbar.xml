@@ -20,7 +20,11 @@
         android:id="@+id/exo_position"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
         android:text="@string/timeline_default"
+        android:textAlignment="viewStart"
+        android:textColor="@color/danube"
+        android:textSize="12sp"
         app:layout_constraintStart_toStartOf="@+id/exo_progress"
         app:layout_constraintTop_toBottomOf="@+id/exo_progress" />
 
@@ -28,7 +32,11 @@
         android:id="@+id/exo_duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
         android:text="@string/timeline_default"
+        android:textAlignment="viewEnd"
+        android:textColor="@color/regent_gray"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="@+id/exo_progress"
         app:layout_constraintTop_toBottomOf="@+id/exo_progress" />
 
