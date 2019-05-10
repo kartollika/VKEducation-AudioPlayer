@@ -9,20 +9,6 @@ class PreferencesUtils(private val context: Context) {
 
     private lateinit var sharedPreferences: SharedPreferences
 
-//    fun saveLastPlayedTracks(tracks: List<AudioTrack>) {
-//        sharedPreferences = context.getSharedPreferences(AUDIO_STORAGE, Context.MODE_PRIVATE)
-//        sharedPreferences.edit().apply {
-//            putString("tracks", JSONArray(tracks).toString())
-//        }.apply()
-//    }
-//
-//    fun saveLastPlayedTracks(tracks: List<AudioTrack>) {
-//        sharedPreferences = context.getSharedPreferences(AUDIO_STORAGE, Context.MODE_PRIVATE)
-//        val a =
-//        sharedPreferences.edit().apply {
-//            putString("tracks", JSONArray(tracks).toString())
-//        }.apply()
-//    }
     fun saveLastPlayedDirectory(lastDirectory: String) {
         sharedPreferences = context.getSharedPreferences(AUDIO_STORAGE, Context.MODE_PRIVATE)
         sharedPreferences.edit().apply {
