@@ -9,6 +9,11 @@ import kartollika.vkeducation.audioplayer.player.AudioTrack
 class AudioTracksAdapter(audioTracks: List<AudioTrack>) :
     RecyclerView.Adapter<AudioTrackViewHolder>() {
 
+    private val dummyView = 1
+    private val dummyAudioTrack =
+        AudioTrack(title = "Треков нет. Выберите треки и приходите обратно :)")
+    private val defaultTrackView = 0
+
     interface OnSetTracksListener {
         fun onSet(isEmpty: Boolean)
     }
@@ -28,9 +33,20 @@ class AudioTracksAdapter(audioTracks: List<AudioTrack>) :
         return AudioTrackViewHolder(view)
     }
 
-    override fun getItemCount(): Int = audioTracks.size
+    override fun getItemCount(): Int = Math.max(audioTracks.size, 1)
 
     override fun onBindViewHolder(p0: AudioTrackViewHolder, position: Int) {
-        p0.bind(audioTracks[position])
+        if (getItemViewType(position) == dummyView) {
+            p0.bind(dummyAudioTrack)
+        } else {
+            p0.bind(audioTracks[position])
+        }
+    }
+
+    override fun getItemViewType(position: Int): Int {
+        if (audioTracks.isEmpty()) {
+            return dummyView
+        }
+        return defaultTrackView
     }
 }
