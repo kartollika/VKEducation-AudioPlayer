@@ -16,7 +16,7 @@
             android:scrollbars="none">
 
             <TextView
-                android:id="@+id/choose_folder_current_textview"
+                android:id="@+id/currentFolderTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:maxLines="1"
@@ -32,7 +32,7 @@
 
 
     <android.support.v7.widget.RecyclerView
-        android:id="@+id/folders_recyclerview"
+        android:id="@+id/foldersRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1" />
@@ -49,7 +49,7 @@
             android:background="#81A2A2A2" />
 
         <TextView
-            android:id="@+id/choose_folder_textview"
+            android:id="@+id/chooseFolderActionView"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="right"

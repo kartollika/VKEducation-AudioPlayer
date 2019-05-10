@@ -1,12 +1,12 @@
 package kartollika.vkeducation.audioplayer.presentation.folder_chooser
 
-import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import kartollika.vkeducation.audioplayer.R
+import kotlinx.android.synthetic.main.folder_item.view.*
 
 class ChooseFolderAdapter(private var folders: List<String>) :
     RecyclerView.Adapter<ChooseFolderAdapter.ChooseItemViewHolder>() {
@@ -31,12 +31,8 @@ class ChooseFolderAdapter(private var folders: List<String>) :
         }
     }
 
-    private fun getHolderView(context: Context, layout: Int): View {
-        return LayoutInflater.from(context).inflate(layout, null)
-    }
-
     override fun onCreateViewHolder(p0: ViewGroup, viewType: Int): ChooseItemViewHolder {
-        val view = getHolderView(p0.context, R.layout.folder_item)
+        val view = LayoutInflater.from(p0.context).inflate(R.layout.folder_item, p0, false)
         return when (viewType) {
             TYPE_BACK -> ChooseBackFolderViewHolder(view)
             TYPE_FOLDER -> ChooseFolderViewHolder(view)
@@ -58,7 +54,7 @@ class ChooseFolderAdapter(private var folders: List<String>) :
     }
 
     abstract inner class ChooseItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val pathTextView = itemView.findViewById<TextView>(R.id.folder_path_textview)
+        private val pathTextView = itemView.findViewById<TextView>(R.id.folderPathTextView)
 
         open fun bind(path: String) {
             pathTextView.text = path
@@ -67,7 +63,7 @@ class ChooseFolderAdapter(private var folders: List<String>) :
 
     inner class ChooseFolderViewHolder(itemView: View) : ChooseItemViewHolder(itemView) {
 
-        private val pathContainer = itemView.findViewById<View>(R.id.folder_path_container_root)
+        private val pathContainer = itemView.folderPathTextView
 
         override fun bind(path: String) {
             super.bind(path)
@@ -81,7 +77,7 @@ class ChooseFolderAdapter(private var folders: List<String>) :
 
     inner class ChooseBackFolderViewHolder(itemView: View) : ChooseItemViewHolder(itemView) {
 
-        private val pathContainer = itemView.findViewById<View>(R.id.folder_path_container_root)
+        private val pathContainer = itemView.folderPathTextView
 
         override fun bind(path: String) {
             super.bind(path)
