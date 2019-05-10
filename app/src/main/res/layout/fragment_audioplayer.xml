@@ -88,25 +88,14 @@
                 android:src="@drawable/ic_mini_player_next_28" />
 
             <ImageView
-                android:id="@+id/playActionView"
+                android:id="@+id/pausePlayActionView"
                 android:layout_width="72dp"
                 android:layout_height="72dp"
                 android:layout_marginLeft="42dp"
                 android:layout_marginRight="42dp"
                 android:background="@drawable/standart_circle_button_gradient"
                 android:padding="12dp"
-                android:src="@drawable/ic_play_48" />
-
-            <ImageView
-                android:id="@+id/pauseActionView"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:layout_marginLeft="42dp"
-                android:layout_marginRight="42dp"
-                android:background="@drawable/standart_circle_button_gradient"
-                android:padding="12dp"
-                android:src="@drawable/ic_pause_48"
-                android:visibility="gone" />
+                android:src="@drawable/ic_pause_48" />
 
             <ImageView
                 android:id="@+id/nextTrackActionView"

@@ -11,7 +11,8 @@ import android.widget.FrameLayout
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.common.utils.dpToPx
 import kartollika.vkeducation.audioplayer.common.utils.onRenderFinished
-import kotlinx.android.synthetic.main.view_audio_player.view.*
+import kartollika.vkeducation.audioplayer.presentation.player.mini.MiniPlayerFragment
+import kotlinx.android.synthetic.main.view_bottom_sheet_audio_player.view.*
 
 class FloatingBottomPlayer(
     context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
@@ -27,7 +28,7 @@ class FloatingBottomPlayer(
     }
 
     private fun initContent() {
-        LayoutInflater.from(context).inflate(R.layout.view_audio_player, this, true)
+        LayoutInflater.from(context).inflate(R.layout.view_bottom_sheet_audio_player, this, true)
 
         onRenderFinished(this, Runnable {
             val layoutParams = layoutParams as CoordinatorLayout.LayoutParams
@@ -60,16 +61,20 @@ class FloatingBottomPlayer(
     }
 
     fun initPlayerFragment(fragmentManager: FragmentManager) {
-        fragmentManager.beginTransaction().replace(R.id.audioPlayerContainerView, PlayerFragment())
-            .commit()
+        fragmentManager.beginTransaction().replace(R.id.audioPlayerContainerView, PlayerFragment.newInstance()).commit()
 
         initSmoothAnimations()
+    }
+
+    fun initMiniPlayerFragment(fragmentManager: FragmentManager) {
+        fragmentManager.beginTransaction()
+            .replace(R.id.miniPlayerContainer, MiniPlayerFragment.newInstance()).commit()
     }
 
     private fun initSmoothAnimations() {
         addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(p0: View, offset: Float) {
-                playerMiniContainerView.alpha = 1 - 1 / 0.3f * offset
+                miniPlayerContainer.alpha = 1 - 1 / 0.3f * offset
                 playerFullContainerView.alpha = Math.min(1 / 0.3f * offset - 1 - offset, 1f)
             }
 
@@ -77,7 +82,7 @@ class FloatingBottomPlayer(
             }
         })
         playerFullContainerView.visibility = View.VISIBLE
-        playerMiniContainerView.visibility = View.VISIBLE
+        miniPlayerContainer.visibility = View.VISIBLE
         playerFullContainerView.alpha = 0f
     }
 
