@@ -14,10 +14,8 @@ import kartollika.vkeducation.audioplayer.common.utils.onRenderFinished
 import kotlinx.android.synthetic.main.view_audio_player.view.*
 
 class FloatingBottomPlayer(
-    context: Context,
-    attrs: AttributeSet?,
-    defStyleAttr: Int
-) : FrameLayout(context, attrs, defStyleAttr) {
+    context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
+    FrameLayout(context, attrs, defStyleAttr) {
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private val callbacks: MutableList<BottomSheetBehavior.BottomSheetCallback> = mutableListOf()
@@ -55,18 +53,14 @@ class FloatingBottomPlayer(
         })
 
         bottomSheetHideView.setOnClickListener {
-            if (getSheetState() == BottomSheetBehavior.STATE_EXPANDED) {
+            if (isExpanded()) {
                 collapseSheet()
-            } else {
-                expandeSheet()
             }
         }
     }
 
     fun initPlayerFragment(fragmentManager: FragmentManager) {
-        fragmentManager
-            .beginTransaction()
-            .replace(R.id.audioPlayerContainerView, PlayerFragment())
+        fragmentManager.beginTransaction().replace(R.id.audioPlayerContainerView, PlayerFragment())
             .commit()
 
         initSmoothAnimations()
@@ -76,8 +70,7 @@ class FloatingBottomPlayer(
         addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(p0: View, offset: Float) {
                 playerMiniContainerView.alpha = 1 - 1 / 0.3f * offset
-                playerFullContainerView.alpha =
-                    Math.min(1 / 0.3f * offset - 1 - offset, 1f)
+                playerFullContainerView.alpha = Math.min(1 / 0.3f * offset - 1 - offset, 1f)
             }
 
             override fun onStateChanged(p0: View, state: Int) {
@@ -92,13 +85,15 @@ class FloatingBottomPlayer(
         callbacks.add(callback)
     }
 
-    fun getSheetState() = bottomSheetBehavior.state
+    fun isExpanded() = bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED
+
+    fun isCollapsed() = bottomSheetBehavior.state == BottomSheetBehavior.STATE_COLLAPSED
 
     fun collapseSheet() {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
     }
 
-    fun expandeSheet() {
+    fun expandSheet() {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
     }
 
