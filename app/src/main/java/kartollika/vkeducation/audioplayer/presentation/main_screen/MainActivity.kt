@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     private var isPlayerBounded = false
     private var binder: Binder? = null
 
-    private var serviceConnection: ServiceConnection? = object : ServiceConnection {
+    private var serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             this@MainActivity.binder = binder as Binder?
             playerService = (binder as PlayerService.AudioPlayerBinder).getService()
@@ -75,11 +75,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     override fun onDestroy() {
         super.onDestroy()
         unbind()
-//        if (isPlayerBounded) {
-//            unbindService(serviceConnection)
-//            isPlayerBounded = false
-//        }
-//        serviceConnection = null
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -189,13 +184,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
      override fun onLoaderReset(p0: Loader<Cursor>) {
      }*/
 
-//    private fun unbindPlayerService() {
-//        if (isPlayerBounded) {
-//            unbindService(serviceConnection)
-//            isPlayerBounded = false
-//        }
-//}
-
     private fun bindPlayerService() {
         bindService(getPlayerServiceIntent(), serviceConnection, Context.BIND_AUTO_CREATE)
         isPlayerBounded = true
@@ -203,9 +191,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     private fun unbind() {
         if (isPlayerBounded) {
-            // Detach our existing connection.
-            unbindService(serviceConnection);
-            isPlayerBounded = false;
+            unbindService(serviceConnection)
+            isPlayerBounded = false
         }
     }
 
@@ -255,9 +242,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
-
-//    override fun getBinder(listener: OnBinderResultListener): Binder? {
-//    }
 
     private fun isStoragePermissionGranted(): Boolean {
         return ContextCompat.checkSelfPermission(

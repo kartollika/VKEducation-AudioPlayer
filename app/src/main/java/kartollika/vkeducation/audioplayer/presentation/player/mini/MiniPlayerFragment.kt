@@ -25,7 +25,6 @@ class MiniPlayerFragment : Fragment() {
         fun newInstance() = MiniPlayerFragment()
     }
 
-    //    private lateinit var playerService: PlayerService?
     private var isPlayerBounded = false
     private lateinit var mediaController: MediaControllerCompat
 
@@ -75,13 +74,6 @@ class MiniPlayerFragment : Fragment() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        /*if (!isPlayerBounded) {
-            bindPlayerService()
-        }*/
-    }
-
     private var playerService: PlayerService? = null
 
     override fun onCreateView(
@@ -106,30 +98,14 @@ class MiniPlayerFragment : Fragment() {
         bindPlayerService()
     }
 
-    /*override fun onDestroy() {
-        super.onDestroy()
-        if (isPlayerBounded) {
-            activity?.unbindService(serviceConnection)
-        }
-    }*/
-
-    /*private fun bindPlayerService() {
-        val playerServiceIntent = getPlayerServiceIntent()
-        activity?.bindService(
-            playerServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE
-        )
-    }*/
-
     override fun onDestroy() {
         super.onDestroy()
         unbindService()
     }
 
     private fun unbindService() {
-//        if (isPlayerBounded) {
         activity?.unbindService(serviceConnection)
         isPlayerBounded = false
-//        }
     }
 
     private fun bindPlayerService() {

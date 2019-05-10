@@ -85,15 +85,6 @@ class PlayerFragment : Fragment() {
         exo_controllers.player = exoPlayer
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-//        if (!isPlayerBounded) {
-//            isPlayerBounded = true
-//        }
-
-    }
-
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         bindPlayerService()
@@ -113,9 +104,6 @@ class PlayerFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         unbindService()
-//        if (!isPlayerBounded) {
-//            activity?.unbindService(serviceConnection)
-//            isPlayerBounded = false
     }
 
     private fun initTracksRecyclerView() {
@@ -177,10 +165,8 @@ class PlayerFragment : Fragment() {
     }
 
     private fun unbindService() {
-//        if (isPlayerBounded) {
         activity?.unbindService(serviceConnection)
         isPlayerBounded = false
-//        }
     }
 
     private fun bindPlayerService() {
