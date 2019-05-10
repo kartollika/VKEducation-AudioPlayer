@@ -8,10 +8,15 @@
     android:focusable="false"
     android:focusableInTouchMode="false">
 
-    <include
-        android:id="@+id/playerMiniContainerView"
-        layout="@layout/view_mini_player"
-        android:visibility="gone" />
+    <FrameLayout
+        android:id="@+id/miniPlayerContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!--<include-->
+    <!--android:id="@+id/playerMiniContainerView"-->
+    <!--layout="@layout/view_mini_player"-->
+    <!--android:visibility="gone" />-->
 
     <LinearLayout
         android:id="@+id/playerFullContainerView"

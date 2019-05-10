@@ -11,9 +11,7 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
@@ -135,6 +133,7 @@ class PlayerService : Service() {
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, track.artist)
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, track.title)
         metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, track.howLong.toLong())
+
         metadataBuilder.putString(
             MediaMetadataCompat.METADATA_KEY_ART_URI, track.albumArt.toString()
         )
@@ -154,7 +153,7 @@ class PlayerService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        return START_STICKY
+        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onDestroy() {
@@ -226,6 +225,22 @@ class PlayerService : Service() {
         val trackSelection = DefaultTrackSelector()
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelection)
         exoPlayer!!.addListener(object : Player.EventListener {
+            override fun onSeekProcessed() {
+                super.onSeekProcessed()
+            }
+
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                super.onPlayerStateChanged(playWhenReady, playbackState)
+            }
+
+            override fun onTimelineChanged(timeline: Timeline?, manifest: Any?, reason: Int) {
+                super.onTimelineChanged(timeline, manifest, reason)
+            }
+
+            override fun onPlayerError(error: ExoPlaybackException?) {
+                super.onPlayerError(error)
+                mediaSessionCallbacks.onSkipToNext()
+            }
 
             override fun onPositionDiscontinuity(reason: Int) {
                 super.onPositionDiscontinuity(reason)

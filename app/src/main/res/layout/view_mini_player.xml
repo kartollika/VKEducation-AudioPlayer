@@ -3,18 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center"
     android:background="@android:color/white"
+    android:gravity="center"
     android:orientation="horizontal"
     android:padding="10dp">
 
     <ImageView
+        android:id="@+id/albumPreviewImageView"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:scaleType="centerCrop"
-        android:src="@drawable/images" />
+        tools:src="@drawable/images" />
 
     <TextView
+        android:id="@+id/songNameTextView"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="@dimen/default_three_quarters_horizontal_margin"
@@ -23,22 +25,34 @@
         tools:text="Song name" />
 
     <TextView
+        android:id="@+id/durationSongLengthView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/default_three_quarters_horizontal_margin"
         android:gravity="right"
-        android:textColor="#909499"
+        android:textColor="@color/regent_gray"
         android:textSize="12sp"
         tools:text="-3:21" />
 
     <ImageButton
+        android:id="@+id/playPauseActionView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/default_horizontal_margin"
         android:background="@android:color/transparent"
-        android:src="@drawable/ic_pause_28" />
+        android:src="@drawable/ic_play_28" />
+<!--
+    <ImageButton
+        android:id="@+id/pauseActionView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/default_horizontal_margin"
+        android:background="@android:color/transparent"
+        android:src="@drawable/ic_pause_28"
+        android:visibility="gone" />-->
 
     <ImageButton
+        android:id="@+id/nextTrackActionView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"

@@ -25,8 +25,11 @@ import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.presentation.player.tracks_list.AudioTracksAdapter
 import kotlinx.android.synthetic.main.fragment_audioplayer.*
 
-
 class PlayerFragment : Fragment() {
+
+    companion object {
+        fun newInstance() = PlayerFragment()
+    }
 
     private lateinit var tracksAdapter: AudioTracksAdapter
     private lateinit var playerService: PlayerService
@@ -85,9 +88,15 @@ class PlayerFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (!isPlayerBounded) {
-            bindPlayerService()
-        }
+//        if (!isPlayerBounded) {
+//            isPlayerBounded = true
+//        }
+
+    }
+
+    override fun onAttach(context: Context?) {
+        super.onAttach(context)
+        bindPlayerService()
     }
 
     override fun onCreateView(
@@ -98,8 +107,15 @@ class PlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initTracksRecyclerView()
-
         initListeners()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unbindService()
+//        if (!isPlayerBounded) {
+//            activity?.unbindService(serviceConnection)
+//            isPlayerBounded = false
     }
 
     private fun initTracksRecyclerView() {
@@ -128,7 +144,7 @@ class PlayerFragment : Fragment() {
         previousTrackActionView.setOnClickListener { mediaController.transportControls.skipToPrevious() }
         nextTrackActionView.setOnClickListener { mediaController.transportControls.skipToNext() }
         pauseActionView.setOnClickListener { mediaController.transportControls.pause() }
-        playActionView.setOnClickListener { mediaController.transportControls.play() }
+        pauseActionView.setOnClickListener { mediaController.transportControls.play() }
     }
 
     fun initializeInitialState() {
@@ -157,14 +173,22 @@ class PlayerFragment : Fragment() {
         previousTrackActionView.isEnabled = isPlaylistEmpty
         nextTrackActionView.isEnabled = isPlaylistEmpty
         pauseActionView.isEnabled = isPlaylistEmpty
-        playActionView.isEnabled = isPlaylistEmpty
+        pauseActionView.isEnabled = isPlaylistEmpty
+    }
+
+    private fun unbindService() {
+//        if (isPlayerBounded) {
+        activity?.unbindService(serviceConnection)
+        isPlayerBounded = false
+//        }
     }
 
     private fun bindPlayerService() {
         val playerServiceIntent = getPlayerServiceIntent()
-        context?.bindService(playerServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        activity?.bindService(playerServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        isPlayerBounded = true
     }
 
-    private fun getPlayerServiceIntent() = Intent(context, PlayerService::class.java)
+    private fun getPlayerServiceIntent() = Intent(activity, PlayerService::class.java)
 
 }

@@ -5,7 +5,7 @@ const val MILLISECONDS_IN_SECOND = 1000
  * Parse time in milliseconds in format like mm:ss
  * where m - minute, s - second
  */
-fun Int.parseIntToLength(): String {
+fun Long.parseIntToLength(): String {
     val normalizedTime = this / MILLISECONDS_IN_SECOND
     val minutes = normalizedTime / 60
     val seconds = normalizedTime % 60
