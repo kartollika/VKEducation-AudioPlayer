@@ -1,6 +1,7 @@
 package kartollika.vkeducation.audioplayer.common.utils
 
 const val MILLISECONDS_IN_SECOND = 1000
+
 /**
  * Parse time in milliseconds in format like mm:ss
  * where m - minute, s - second
@@ -26,4 +27,14 @@ fun Long.parseIntToLength(): String {
     }
 
     return lengthStringBuilder.toString()
+}
+
+/**
+ * Parse time in format mm:ss in milliseconds
+ * where m - minute, s - second
+ */
+fun String.parseToMilliseconds(): Long {
+    val timeParts = split(":")
+    val seconds = timeParts[0].toLong() * 60 + timeParts[1].toLong()
+    return seconds * MILLISECONDS_IN_SECOND
 }

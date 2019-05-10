@@ -11,12 +11,7 @@
     <FrameLayout
         android:id="@+id/miniPlayerContainer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <!--<include-->
-    <!--android:id="@+id/playerMiniContainerView"-->
-    <!--layout="@layout/view_mini_player"-->
-    <!--android:visibility="gone" />-->
+        android:layout_height="60dp" />
 
     <LinearLayout
         android:id="@+id/playerFullContainerView"

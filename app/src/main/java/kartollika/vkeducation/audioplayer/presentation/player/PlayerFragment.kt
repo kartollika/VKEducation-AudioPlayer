@@ -49,13 +49,9 @@ class PlayerFragment : Fragment() {
                 PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM -> {
                 }
                 PlaybackStateCompat.STATE_PLAYING -> {
-                    pauseActionView.visibility = View.VISIBLE
-                    playActionView.visibility = View.GONE
                 }
 
                 PlaybackStateCompat.STATE_PAUSED -> {
-                    pauseActionView.visibility = View.GONE
-                    playActionView.visibility = View.VISIBLE
                 }
             }
         }
@@ -131,8 +127,15 @@ class PlayerFragment : Fragment() {
     private fun initListeners() {
         previousTrackActionView.setOnClickListener { mediaController.transportControls.skipToPrevious() }
         nextTrackActionView.setOnClickListener { mediaController.transportControls.skipToNext() }
-        pauseActionView.setOnClickListener { mediaController.transportControls.pause() }
-        pauseActionView.setOnClickListener { mediaController.transportControls.play() }
+        pausePlayActionView.setOnClickListener {
+            if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
+                mediaController.transportControls.pause()
+                pausePlayActionView.setImageResource(R.drawable.ic_play_48)
+            } else if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
+                mediaController.transportControls.play()
+                pausePlayActionView.setImageResource(R.drawable.ic_pause_48)
+            }
+        }
     }
 
     fun initializeInitialState() {
@@ -160,8 +163,7 @@ class PlayerFragment : Fragment() {
     fun changeControlsState(isPlaylistEmpty: Boolean) {
         previousTrackActionView.isEnabled = isPlaylistEmpty
         nextTrackActionView.isEnabled = isPlaylistEmpty
-        pauseActionView.isEnabled = isPlaylistEmpty
-        pauseActionView.isEnabled = isPlaylistEmpty
+        pausePlayActionView.isEnabled = isPlaylistEmpty
     }
 
     private fun unbindService() {

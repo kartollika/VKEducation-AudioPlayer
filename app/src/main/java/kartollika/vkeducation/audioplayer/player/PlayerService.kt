@@ -11,7 +11,10 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
-import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.ExoPlaybackException
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.ExoPlayerFactory
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
@@ -54,6 +57,7 @@ class PlayerService : Service() {
                         1f
                     ).build()
                 )
+                onPlay()
             }
 
             override fun onPlay() {
@@ -98,14 +102,21 @@ class PlayerService : Service() {
                         PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM, id, 1f
                     ).build()
                 )
+
+                mediaSession.setPlaybackState(
+                    stateBuilder.setState(
+                        PlaybackStateCompat.STATE_PLAYING, id, 1f
+                    ).build()
+                )
+                onPlay()
             }
 
             override fun onSkipToNext() {
                 super.onSkipToNext()
                 exoPlayer?.next()
 
-                val previousTrack = playerRepository.getNextTrack()
-                updateRelevantMetadata(previousTrack)
+                val nextTrack = playerRepository.getNextTrack()
+                updateRelevantMetadata(nextTrack)
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_SKIPPING_TO_NEXT,
@@ -113,6 +124,7 @@ class PlayerService : Service() {
                         1f
                     ).build()
                 )
+                onPlay()
             }
 
             override fun onPause() {
@@ -225,17 +237,6 @@ class PlayerService : Service() {
         val trackSelection = DefaultTrackSelector()
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelection)
         exoPlayer!!.addListener(object : Player.EventListener {
-            override fun onSeekProcessed() {
-                super.onSeekProcessed()
-            }
-
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayerStateChanged(playWhenReady, playbackState)
-            }
-
-            override fun onTimelineChanged(timeline: Timeline?, manifest: Any?, reason: Int) {
-                super.onTimelineChanged(timeline, manifest, reason)
-            }
 
             override fun onPlayerError(error: ExoPlaybackException?) {
                 super.onPlayerError(error)
