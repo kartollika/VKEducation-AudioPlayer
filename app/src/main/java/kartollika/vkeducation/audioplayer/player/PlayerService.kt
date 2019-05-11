@@ -1,5 +1,6 @@
 package kartollika.vkeducation.audioplayer.player
 
+import android.app.Notification
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -7,7 +8,11 @@ import android.media.AudioManager
 import android.net.Uri
 import android.os.Binder
 import android.os.IBinder
+import android.support.v4.app.NotificationCompat
+import android.support.v4.app.NotificationManagerCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.support.v4.media.app.NotificationCompat.MediaStyle
+import android.support.v4.media.session.MediaButtonReceiver
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v4.media.session.PlaybackStateCompat.*
@@ -21,6 +26,7 @@ import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import kartollika.vkeducation.audioplayer.R
 
 
 class PlayerService : Service() {
@@ -58,6 +64,7 @@ class PlayerService : Service() {
                     ).build()
                 )
                 onPlay()
+                updateForegroundNotification()
             }
 
             override fun onPlay() {
@@ -74,6 +81,8 @@ class PlayerService : Service() {
                         1f
                     ).build()
                 )
+
+                updateForegroundNotification()
             }
 
             override fun onStop() {
@@ -88,6 +97,8 @@ class PlayerService : Service() {
                         1f
                     ).build()
                 )
+
+                updateForegroundNotification()
             }
 
             override fun onSkipToQueueItem(id: Long) {
@@ -109,6 +120,7 @@ class PlayerService : Service() {
                     ).build()
                 )
                 onPlay()
+                updateForegroundNotification()
             }
 
             override fun onSkipToNext() {
@@ -125,6 +137,7 @@ class PlayerService : Service() {
                     ).build()
                 )
                 onPlay()
+                updateForegroundNotification()
             }
 
             override fun onPause() {
@@ -138,6 +151,7 @@ class PlayerService : Service() {
                         1f
                     ).build()
                 )
+                updateForegroundNotification()
             }
         }
 
@@ -267,4 +281,75 @@ class PlayerService : Service() {
     }
 
     fun getExoPlayer() = exoPlayer
+
+    private fun updateForegroundNotification() {
+        val playbackState = mediaSession.controller.playbackState
+        when (playbackState.state) {
+            PlaybackStateCompat.STATE_PLAYING -> {
+                startForeground(
+                    12, getNotificationForState(playbackState)
+                )
+            }
+
+            PlaybackStateCompat.STATE_PAUSED -> {
+                NotificationManagerCompat.from(applicationContext)
+                    .notify(12, getNotificationForState(playbackState))
+                stopForeground(false)
+            }
+
+            else -> {
+                stopForeground(true)
+            }
+        }
+    }
+
+    private fun getNotificationForState(state: PlaybackStateCompat): Notification {
+        val builder =
+            PlayerNotificationHelper.instanciateNotificationWithContent(this, mediaSession)
+
+        with(builder) {
+            addAction(
+                NotificationCompat.Action.Builder(
+                    R.mipmap.ic_launcher, "next", MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        applicationContext, PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                    )
+                ).build()
+            )
+
+            if (state.state == PlaybackStateCompat.STATE_PLAYING) {
+                addAction(
+                    NotificationCompat.Action.Builder(
+                        R.drawable.ic_pause_28,
+                        "Pause",
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(
+                            applicationContext, PlaybackStateCompat.ACTION_PAUSE
+                        )
+                    ).build()
+                )
+            }
+            if (state.state == PlaybackStateCompat.STATE_PAUSED) {
+                addAction(
+                    NotificationCompat.Action.Builder(
+                        R.drawable.ic_play_28,
+                        "Play",
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(
+                            applicationContext, PlaybackStateCompat.ACTION_PLAY
+                        )
+                    ).build()
+                )
+            }
+            setStyle(
+                MediaStyle().setShowActionsInCompactView(1).setMediaSession(mediaSession.sessionToken).setShowCancelButton(
+                    true
+                ).setCancelButtonIntent(
+                        MediaButtonReceiver.buildMediaButtonPendingIntent(
+                            applicationContext, PlaybackStateCompat.ACTION_STOP
+                        )
+                    )
+            )
+            setOnlyAlertOnce(true)
+            priority = NotificationCompat.PRIORITY_HIGH
+        }
+        return builder.build()
+    }
 }
