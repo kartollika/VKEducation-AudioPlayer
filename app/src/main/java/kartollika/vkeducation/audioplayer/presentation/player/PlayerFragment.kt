@@ -112,6 +112,10 @@ class PlayerFragment : Fragment() {
         tracksAdapter = AudioTracksAdapter().apply {
             onSetAudioTracksListener = object : AudioTracksAdapter.OnSetTracksListener {
                 override fun onSet(isEmpty: Boolean) {
+                    if (isEmpty) {
+                        artistNameTextView.text = getString(R.string.no_tracks_title)
+                        songNameTextView.text = getString(R.string.no_tracks_summary)
+                    }
                     changeControlsState(!isEmpty)
                 }
             }

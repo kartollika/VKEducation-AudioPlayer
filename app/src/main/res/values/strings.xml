@@ -5,4 +5,6 @@
     <string name="choose_music_folder_action">Выбрать папку</string>
 
     <string name="timeline_default">0:00</string>
+    <string name="no_tracks_title">Треков нет</string>
+    <string name="no_tracks_summary">Выберите треки и приходите обратно :)</string>
 </resources>
