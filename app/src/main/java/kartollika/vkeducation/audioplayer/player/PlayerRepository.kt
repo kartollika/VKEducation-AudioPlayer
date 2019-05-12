@@ -25,6 +25,8 @@ class PlayerRepository {
 
     fun getCurrentIndex() = currentAudioIndex
 
+    fun getCurrentIndexAsLong() = currentAudioIndex.toLong()
+
     fun skipTo(newCurrentIndex: Long) {
         currentAudioIndex = newCurrentIndex.toInt()
     }
