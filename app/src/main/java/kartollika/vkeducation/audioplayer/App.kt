@@ -11,6 +11,5 @@ class App : Application() {
 
         val playerServiceIntent = Intent(this, PlayerService::class.java)
         startService(playerServiceIntent)
-
     }
 }

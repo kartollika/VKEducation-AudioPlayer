@@ -15,22 +15,9 @@ class PreferencesUtils(private val context: Context) {
             putString("last_directory", lastDirectory)
         }.apply()
     }
-//
+
     fun getLastPlayedDirectory(): String {
         sharedPreferences = context.getSharedPreferences(AUDIO_STORAGE, Context.MODE_PRIVATE)
         return sharedPreferences.getString("last_directory", "")!!
     }
-
-    fun saveLastPlayedPosition(lastPosition: Int) {
-        sharedPreferences = context.getSharedPreferences(AUDIO_STORAGE, Context.MODE_PRIVATE)
-        sharedPreferences.edit().apply {
-            putInt("last_position", lastPosition)
-        }.apply()
-    }
-
-    fun getLastPlayedPosition(): Int {
-        sharedPreferences = context.getSharedPreferences(AUDIO_STORAGE, Context.MODE_PRIVATE)
-        return sharedPreferences.getInt("last_position", -1)
-    }
-
 }
