@@ -136,6 +136,7 @@ class MiniPlayerFragment : Fragment() {
                 mediaController?.transportControls?.play()
             }
         }
+        songNameTextView.isSelected = true
         nextTrackActionView.setOnClickListener { mediaController?.transportControls?.skipToNext() }
     }
 
