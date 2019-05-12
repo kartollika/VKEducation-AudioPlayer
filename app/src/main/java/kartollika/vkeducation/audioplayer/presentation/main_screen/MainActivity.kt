@@ -11,7 +11,6 @@ import android.net.Uri
 import android.os.Binder
 import android.os.Bundle
 import android.os.IBinder
-import android.provider.MediaStore
 import android.provider.Settings
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.app.ActivityCompat
@@ -19,7 +18,7 @@ import android.support.v4.content.ContextCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
-import kartollika.vkeducation.audioplayer.player.AudioTrack
+import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.presentation.folder_chooser.FolderChooserActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -28,7 +27,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
 
     private lateinit var presenter: MainActivityPresenter
-    private var lastPlayedPath: String = ""
     private var playerService: PlayerService? = null
     private var isPlayerBounded = false
     private var binder: Binder? = null
@@ -51,7 +49,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
         if (savedInstanceState != null) {
             isPlayerBounded = savedInstanceState.getBoolean("ServiceState")
-            lastPlayedPath = savedInstanceState.getString("LastPlayedPath") ?: ""
         }
         setContentView(kartollika.vkeducation.audioplayer.R.layout.activity_main)
 
@@ -79,7 +76,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         savedInstanceState.putBoolean("ServiceState", isPlayerBounded)
-        savedInstanceState.putString("LastPlayedPath", lastPlayedPath)
         super.onSaveInstanceState(savedInstanceState)
     }
 
@@ -91,17 +87,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
                 if (resultCode == Activity.RESULT_OK) {
                     val folder = data?.getStringExtra("chosen_folder") ?: return
-                    lastPlayedPath = folder
-                    queryMusic(lastPlayedPath, object : OnQueryCompleteListener {
-                        override fun onQueryComplete(tracks: List<AudioTrack>) {
-                            if (playerService?.getActiveTracks() != tracks) {
-                                playerService?.reloadTracks(folder, tracks)
-                                playerService?.startPlay()
-                            }
-                        }
-                    })
-//                    LoaderManager.getInstance(this)
-//                        .restartLoader<Cursor>(taskId, Bundle.EMPTY, this@MainActivity)
+                    PreferencesUtils(this).saveLastPlayedDirectory(folder)
+                    playerService?.reloadPlayTracksFromOutsize(folder)
                 }
             }
             101 -> {
@@ -122,75 +109,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         val intent = Intent(this, FolderChooserActivity::class.java)
         startActivityForResult(intent, 9999)
     }
-
-    private interface OnQueryCompleteListener {
-        fun onQueryComplete(tracks: List<AudioTrack>)
-    }
-
-    private fun queryMusic(fromFolder: String, listener: OnQueryCompleteListener) {
-        val uriQuery = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-        val selection =
-            MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DATA + " like ? AND " + MediaStore.Audio.Media.DATA + " NOT LIKE ? "
-        val selectionArgs = arrayOf("%$fromFolder%", "%$fromFolder/%/%")
-        contentResolver.query(uriQuery, null, selection, selectionArgs, null)?.use { cursor ->
-            val tracks = mutableListOf<AudioTrack>()
-            while (cursor.moveToNext()) {
-                val data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                val artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-                val title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-                val length = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-
-                tracks.add(
-                    AudioTrack(
-                        artist = artist, title = title, howLong = length, uri = Uri.parse(data)
-                    )
-                )
-            }
-
-            listener.onQueryComplete(tracks)
-
-//            if (tracks != playerService?.getActiveTracks() && tracks.size != 0) {
-//                playerService?.reloadTracks(lastPlayedPath, tracks)
-//                playerService?.startPlay()
-//            }
-        }
-    }
-
-    /* override fun onCreateLoader(id: Int, args: Bundle?): Loader<Cursor> {
-         val uriQuery = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-         val selection =
-             MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DATA + " like ? AND " + MediaStore.Audio.Media.DATA + " NOT LIKE ? "
-         val selectionArgs = arrayOf("%$lastPlayedPath%", "%$lastPlayedPath/%/%")
-         return CursorLoader(this, uriQuery, null, selection, selectionArgs, null)
-     }
-
-     override fun onLoadFinished(p0: Loader<Cursor>, cursor: Cursor?) {
-         val tracks = mutableListOf<AudioTrack>()
-         if (cursor == null) {
-             return
-         }
-
-         while (cursor.moveToNext()) {
-             val data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-             val artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-             val title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-             val length = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-
-             tracks.add(
-                 AudioTrack(
-                     artist = artist, title = title, howLong = length, uri = Uri.parse(data)
-                 )
-             )
-         }
-
-         if (tracks != playerService?.getActiveTracks() && tracks.size != 0) {
-             playerService?.reloadTracks(lastPlayedPath, tracks)
-             playerService?.startPlay()
-         }
-     }
-
-     override fun onLoaderReset(p0: Loader<Cursor>) {
-     }*/
 
     private fun bindPlayerService() {
         bindService(getPlayerServiceIntent(), serviceConnection, Context.BIND_AUTO_CREATE)

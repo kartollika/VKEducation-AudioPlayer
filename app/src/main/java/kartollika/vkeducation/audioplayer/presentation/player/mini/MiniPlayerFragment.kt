@@ -34,11 +34,15 @@ class MiniPlayerFragment : Fragment() {
     private var exoPlayer: ExoPlayer? = null
     private val handler: Handler = Handler()
 
+    private val updateSongLeftRunnable = Runnable { updateSongLeft() }
+    private lateinit var playerService: PlayerService
+
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
             updateSongLeft()
+            changeControlsState(playerService.getActiveTracks().isNotEmpty())
 
             when (state?.state) {
                 PlaybackStateCompat.STATE_PLAYING -> {
@@ -78,19 +82,19 @@ class MiniPlayerFragment : Fragment() {
         }
     }
 
+    private fun initPlayerViews(exoPlayer: ExoPlayer?) {
+        this.exoPlayer = exoPlayer
+    }
+
     private fun initializeInitialState(mediaController: MediaControllerCompat) {
         mediaControllerCallback.onPlaybackStateChanged(mediaController.playbackState)
         mediaControllerCallback.onMetadataChanged(mediaController.metadata)
+        changeControlsState(playerService.getActiveTracks().isNotEmpty())
     }
 
-    private fun initPlayerViews(exoPlayer: ExoPlayer?) {
-        this.exoPlayer = exoPlayer
-        exoPlayer?.addListener(object : Player.EventListener {
-
-            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
-                super.onPlayerStateChanged(playWhenReady, playbackState)
-            }
-        })
+    fun changeControlsState(isPlaylistEmpty: Boolean) {
+        nextTrackActionView.isEnabled = isPlaylistEmpty
+        playPauseActionView.isEnabled = isPlaylistEmpty
     }
 
     @SuppressLint("SetTextI18n")
@@ -118,10 +122,6 @@ class MiniPlayerFragment : Fragment() {
         }
     }
 
-    private val updateSongLeftRunnable = Runnable { updateSongLeft() }
-
-    private var playerService: PlayerService? = null
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.view_mini_player, null)
@@ -136,6 +136,7 @@ class MiniPlayerFragment : Fragment() {
                 mediaController?.transportControls?.play()
             }
         }
+        songNameTextView.isSelected = true
         nextTrackActionView.setOnClickListener { mediaController?.transportControls?.skipToNext() }
     }
 
