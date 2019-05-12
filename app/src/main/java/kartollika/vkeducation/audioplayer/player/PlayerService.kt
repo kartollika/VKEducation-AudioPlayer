@@ -5,15 +5,20 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.Cursor
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Binder
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
+import android.provider.MediaStore
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
+import android.support.v4.content.CursorLoader
+import android.support.v4.content.Loader
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.app.NotificationCompat.MediaStyle
 import android.support.v4.media.session.MediaButtonReceiver
@@ -28,6 +33,7 @@ import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
+import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kartollika.vkeducation.audioplayer.R
@@ -42,16 +48,17 @@ class PlayerService : Service() {
     private var mediaSessionManager: MediaSessionCompat? = null
     private lateinit var mediaSession: MediaSessionCompat
     private val playerRepository = PlayerRepository()
-    private var lastPlayedUri: Uri? = null
+    private var lastPlayedDirectory: String = ""
     private lateinit var audioManager: AudioManager
     private lateinit var audioFocusRequest: AudioFocusRequest
 
     private val notificationId = 234
+    private var cursorLoader: CursorLoader? = null
     private val notificationChannel = PlayerService::class.java.name
     private var metadataBuilder = MediaMetadataCompat.Builder()
 
     private val stateBuilder: PlaybackStateCompat.Builder = Builder().setActions(
-        ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS
+        ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS or ACTION_PLAY_FROM_URI
     )
 
     private val becomingNoisyBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -82,24 +89,82 @@ class PlayerService : Service() {
         }
     }
 
+    private interface OnQueryListener {
+        fun onQuery(tracks: List<AudioTrack>)
+    }
+
+    private fun getOnLoadCompleteListener(listener: OnQueryListener): Loader.OnLoadCompleteListener<Cursor?> {
+        return Loader.OnLoadCompleteListener { p0, cursor ->
+            val tracks = mutableListOf<AudioTrack>()
+            cursor?.let {
+                while (cursor.moveToNext()) {
+                    val data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
+                    val artist =
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
+                    val title =
+                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
+                    val length =
+                        cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
+
+                    tracks.add(
+                        AudioTrack(
+                            artist = artist, title = title, howLong = length, uri = Uri.parse(data)
+                        )
+                    )
+                }
+            }
+            listener.onQuery(tracks)
+        }
+    }
+
+
     private val mediaSessionCallbacks: MediaSessionCompat.Callback =
         object : MediaSessionCompat.Callback() {
+
+            override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
+                super.onPlayFromUri(uri, extras)
+
+                val path = uri.toString()
+                val uriQuery = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                val selection =
+                    MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DATA + " like ? AND " + MediaStore.Audio.Media.DATA + " NOT LIKE ? "
+                val selectionArgs = arrayOf("%$path%", "%$path/%/%")
+                cursorLoader = CursorLoader(
+                    applicationContext, uriQuery, null, selection, selectionArgs, null
+                )
+
+                cursorLoader!!.registerListener(
+                    1, getOnLoadCompleteListener(object : OnQueryListener {
+                        override fun onQuery(tracks: List<AudioTrack>) {
+                            reloadTracks(path, tracks)
+                            onPlay()
+                        }
+                    })
+                )
+                cursorLoader!!.startLoading()
+            }
+
             override fun onSkipToPrevious() {
                 super.onSkipToPrevious()
                 exoPlayer?.previous()
 
-                val previousTrack = playerRepository.getPreviousTrack()
-                updateRelevantMetadata(previousTrack)
+                exoPlayer?.currentWindowIndex?.let { previousIndex ->
+                    playerRepository.skipTo(previousIndex)
 
-                mediaSession.setPlaybackState(
-                    stateBuilder.setState(
-                        PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS,
-                        playerRepository.getCurrentIndexAsLong(),
-                        1f
-                    ).build()
-                )
-                onPlay()
-                updateForegroundNotification()
+                    val previousTag = mediaSource.getMediaSource(previousIndex).tag!!
+                    playerRepository.getTrackByTag(previousTag)?.let { audio ->
+                        updateRelevantMetadata(audio)
+                    }
+
+                    mediaSession.setPlaybackState(
+                        stateBuilder.setState(
+                            PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS,
+                            playerRepository.getCurrentIndexAsLong(),
+                            1f
+                        ).build()
+                    )
+                    onPlay()
+                }
             }
 
             override fun onPlay() {
@@ -108,22 +173,25 @@ class PlayerService : Service() {
                 if (exoPlayer?.playWhenReady == false) {
                     exoPlayer?.playWhenReady = true
 
-                    val currentTrack = playerRepository.getCurrentTrack()
-                    updateRelevantMetadata(currentTrack)
+                    exoPlayer?.currentWindowIndex?.let { currentIndex ->
+                        val currentTag = mediaSource.getMediaSource(currentIndex).tag!!
+                        playerRepository.getTrackByTag(currentTag)?.let { audio ->
+                            updateRelevantMetadata(audio)
+                        }
 
-                    val audioFocusResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        audioManager.requestAudioFocus(audioFocusRequest)
-                    } else {
-                        audioManager.requestAudioFocus(
-                            audioFocusChangeListener,
-                            AudioManager.STREAM_MUSIC,
-                            AudioManager.AUDIOFOCUS_GAIN
-                        )
-                    }
+                        val audioFocusResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            audioManager.requestAudioFocus(audioFocusRequest)
+                        } else {
+                            audioManager.requestAudioFocus(
+                                audioFocusChangeListener,
+                                AudioManager.STREAM_MUSIC,
+                                AudioManager.AUDIOFOCUS_GAIN
+                            )
+                        }
 
-
-                    if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                        return
+                        if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                            return
+                        }
                     }
                 }
 
@@ -173,48 +241,62 @@ class PlayerService : Service() {
 
             override fun onSkipToQueueItem(id: Long) {
                 super.onSkipToQueueItem(id)
-                var currentTrack = playerRepository.getCurrentTrack()
 
                 if (id == exoPlayer?.currentWindowIndex?.toLong()) {
-                    updateRelevantMetadata(currentTrack)
+                    val skippedTag =
+                        mediaSource.getMediaSource(exoPlayer?.currentWindowIndex!!).tag!!
+                    playerRepository.getTrackByTag(skippedTag)?.let { audio ->
+                        updateRelevantMetadata(audio)
+                    }
                     return
                 }
 
-                playerRepository.skipTo(id)
-                currentTrack = playerRepository.getCurrentTrack()
-                updateRelevantMetadata(currentTrack)
-
                 exoPlayer?.seekTo(id.toInt(), 0)
-                mediaSession.setPlaybackState(
-                    stateBuilder.setState(
-                        PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM, id, 1f
-                    ).build()
-                )
+                exoPlayer?.currentWindowIndex?.let { skippedIndex ->
+                    playerRepository.skipTo(skippedIndex)
 
-                mediaSession.setPlaybackState(
-                    stateBuilder.setState(
-                        PlaybackStateCompat.STATE_PLAYING, id, 1f
-                    ).build()
-                )
-                onPlay()
-                updateForegroundNotification()
+                    val skippedTag = mediaSource.getMediaSource(skippedIndex).tag!!
+                    playerRepository.getTrackByTag(skippedTag)?.let { audio ->
+                        updateRelevantMetadata(audio)
+                    }
+
+                    mediaSession.setPlaybackState(
+                        stateBuilder.setState(
+                            PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM, id, 1f
+                        ).build()
+                    )
+
+                    mediaSession.setPlaybackState(
+                        stateBuilder.setState(
+                            PlaybackStateCompat.STATE_PLAYING, id, 1f
+                        ).build()
+                    )
+                    onPlay()
+                    updateForegroundNotification()
+                }
             }
 
             override fun onSkipToNext() {
                 super.onSkipToNext()
                 exoPlayer?.next()
 
-                val nextTrack = playerRepository.getNextTrack()
-                updateRelevantMetadata(nextTrack)
-                mediaSession.setPlaybackState(
-                    stateBuilder.setState(
-                        PlaybackStateCompat.STATE_SKIPPING_TO_NEXT,
-                        playerRepository.getCurrentIndexAsLong(),
-                        1f
-                    ).build()
-                )
-                onPlay()
-                updateForegroundNotification()
+                exoPlayer?.currentWindowIndex?.let { nextIndex ->
+                    playerRepository.skipTo(nextIndex)
+
+                    val nextTag = mediaSource.getMediaSource(nextIndex).tag!!
+                    playerRepository.getTrackByTag(nextTag)?.let { audio ->
+                        updateRelevantMetadata(audio)
+                    }
+
+                    mediaSession.setPlaybackState(
+                        stateBuilder.setState(
+                            PlaybackStateCompat.STATE_SKIPPING_TO_NEXT,
+                            playerRepository.getCurrentIndexAsLong(),
+                            1f
+                        ).build()
+                    )
+                    onPlay()
+                }
             }
 
             override fun onPause() {
@@ -239,7 +321,9 @@ class PlayerService : Service() {
     private fun updateRelevantMetadata(track: AudioTrack) {
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, track.artist)
         metadataBuilder.putString(MediaMetadataCompat.METADATA_KEY_TITLE, track.title)
-        metadataBuilder.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, track.howLong.toLong())
+        metadataBuilder.putLong(
+            MediaMetadataCompat.METADATA_KEY_DURATION, track.howLong.toLong()
+        )
 
         metadataBuilder.putString(
             MediaMetadataCompat.METADATA_KEY_ART_URI, track.albumArt.toString()
@@ -302,7 +386,21 @@ class PlayerService : Service() {
         this.onTracksChangesListener = tracksChangesListener
     }
 
-    fun getActiveTracks(): List<AudioTrack> = playerRepository.audioTracks
+    private var validActiveTracks: List<AudioTrack> = mutableListOf()
+
+    fun getActiveTracks(): List<AudioTrack> = validActiveTracks
+
+    private fun invalidateValidTracks() {
+        val tracks = mutableListOf<AudioTrack>()
+        for (i in 0 until mediaSource.size) {
+            playerRepository.getTrackByTag(mediaSource.getMediaSource(i).tag.toString())?.let {
+                tracks.add(
+                    it
+                )
+            }
+        }
+        validActiveTracks = tracks
+    }
 
     private fun initMediaSession() {
         if (mediaSessionManager != null) {
@@ -317,43 +415,72 @@ class PlayerService : Service() {
         }
     }
 
-    fun reloadTracks(folderPath: String, tracks: List<AudioTrack>) {
-        val folderUri = Uri.parse(folderPath)
-//        if (lastPlayedUri != folderUri) {
-        lastPlayedUri = folderUri
-        playerRepository.audioTracks = tracks
-        prepareToPlay()
-//        } else {
-//            val audioTracksPreviousTagUris =
-//                playerRepository.audioTracks.map { audioTrack -> audioTrack.uri }.toMutableList()
-//            val newTracksUris = tracks.map { audioTrack -> audioTrack.uri }
-//            val toRemove = audioTracksPreviousTagUris.minus(newTracksUris)
-//            for (toRemoveTrack in toRemove) {
-//                mediaSource.removeMediaSource(toRemove.indexOf(toRemoveTrack))
-//            }
-//
-//            for (i in 0 until audioTracksPreviousTagUris.size) {
-//                if (audioTracksPreviousTagUris[i] != newTracksUris[i]) {
-//                    mediaSource.addMediaSource(i, newTracksUris[i].makeMediaSource())
-//                }
-//            }
-//            playerRepository.audioTracks = tracks
-//        }
-        onTracksChangesListener?.onTracksChanged(tracks)
+    fun reloadTracksFromOutsize(folder: String) {
+        mediaSessionCallbacks.onPlayFromUri(Uri.parse(folder), null)
     }
 
-    private lateinit var dataSourceFactory: DefaultDataSourceFactory
-
-    private fun prepareToPlay() {
-        dataSourceFactory = DefaultDataSourceFactory(this, Util.getUserAgent(this, "test_name"))
-        mediaSource.clear()
-        for (track in playerRepository.audioTracks) {
-            mediaSource.addMediaSource(track.uri.makeMediaSource())
+    private fun reloadTracks(folderPath: String, tracks: List<AudioTrack>) {
+        if (folderPath != lastPlayedDirectory) {
+            lastPlayedDirectory = folderPath
+            mediaSource = doColdTracksReload(tracks)
+            prepareToPlay(mediaSource)
+        } else {
+            doHotTracksReload(tracks)
         }
+        playerRepository.audioTracks =
+            tracks.associateBy { audioTrack: AudioTrack -> audioTrack.uri.toString() }
+
+        invalidateValidTracks()
+        onTracksChangesListener?.onTracksChanged(getActiveTracks())
+    }
+
+    private fun doColdTracksReload(tracks: List<AudioTrack>): ConcatenatingMediaSource {
+        val mediaSource = ConcatenatingMediaSource()
+        val dataSourceFactory = DefaultDataSourceFactory(this, Util.getUserAgent(this, "test_name"))
+        for (track in tracks) {
+            mediaSource.addMediaSource(track.uri.makeMediaSource(dataSourceFactory))
+        }
+        return mediaSource
+    }
+
+    private fun doHotTracksReload(tracks: List<AudioTrack>): ConcatenatingMediaSource {
+        val dataSourceFactory = DefaultDataSourceFactory(this, Util.getUserAgent(this, "test_name"))
+        val mediaSourceTags = mutableMapOf<Int, String>()
+        for (i in 0 until mediaSource.size) {
+            mediaSourceTags[i] = mediaSource.getMediaSource(i).tag.toString()
+        }
+
+        val newSourceTags = mutableMapOf<Int, String>()
+        for (i in 0 until tracks.size) {
+            newSourceTags[i] = tracks[i].uri.toString()
+        }
+
+        var k = 0
+        for (i in 0 until mediaSourceTags.size) {
+            if (!newSourceTags.values.contains(mediaSourceTags[i])) {
+                mediaSource.removeMediaSource(k)
+            } else {
+                k++
+            }
+        }
+
+        for (i in 0 until newSourceTags.size) {
+            if (!mediaSourceTags.values.contains(newSourceTags[i])) {
+                mediaSource.addMediaSource(
+                    Uri.parse(newSourceTags[i].toString()).makeMediaSource(
+                        dataSourceFactory
+                    )
+                )
+            }
+        }
+        return mediaSource
+    }
+
+    private fun prepareToPlay(mediaSource: MediaSource) {
         exoPlayer?.prepare(mediaSource)
     }
 
-    private fun Uri.makeMediaSource(): MediaSource {
+    private fun Uri.makeMediaSource(dataSourceFactory: DataSource.Factory): MediaSource {
         return ExtractorMediaSource.Factory(dataSourceFactory).setTag(this).createMediaSource(this)
     }
 
@@ -376,12 +503,6 @@ class PlayerService : Service() {
         })
     }
 
-    fun startPlay() {
-        if (playerRepository.audioTracks.isNotEmpty()) {
-            mediaSessionCallbacks.onPlay()
-        }
-    }
-
     inner class AudioPlayerBinder : Binder() {
         fun getService() = this@PlayerService
 
@@ -397,13 +518,13 @@ class PlayerService : Service() {
         when (playbackState.state) {
             PlaybackStateCompat.STATE_PLAYING -> {
                 startForeground(
-                    12, getNotificationForState(playbackState)
+                    notificationId, getNotificationForState(playbackState)
                 )
             }
 
             PlaybackStateCompat.STATE_PAUSED -> {
                 NotificationManagerCompat.from(applicationContext)
-                    .notify(12, getNotificationForState(playbackState))
+                    .notify(notificationId, getNotificationForState(playbackState))
                 stopForeground(false)
             }
 
@@ -470,8 +591,8 @@ class PlayerService : Service() {
                     )
                 )
             )
-            setSmallIcon(R.mipmap.ic_launcher)
             setOnlyAlertOnce(true)
+            setSmallIcon(R.mipmap.ic_launcher).setChannelId(notificationChannel)
             priority = NotificationCompat.PRIORITY_HIGH
         }
         return builder.build()
