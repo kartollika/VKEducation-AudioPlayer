@@ -104,29 +104,33 @@ class PlayerService : Service() {
 
             override fun onPlay() {
                 super.onPlay()
-                exoPlayer?.playWhenReady = true
+
+                if (exoPlayer?.playWhenReady == false) {
+                    exoPlayer?.playWhenReady = true
+
+                    val currentTrack = playerRepository.getCurrentTrack()
+                    updateRelevantMetadata(currentTrack)
+
+                    val audioFocusResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        audioManager.requestAudioFocus(audioFocusRequest)
+                    } else {
+                        audioManager.requestAudioFocus(
+                            audioFocusChangeListener,
+                            AudioManager.STREAM_MUSIC,
+                            AudioManager.AUDIOFOCUS_GAIN
+                        )
+                    }
 
 
-                val currentTrack = playerRepository.getCurrentTrack()
-                updateRelevantMetadata(currentTrack)
-
-                val audioFocusResult = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    audioManager.requestAudioFocus(audioFocusRequest)
-                } else {
-                    audioManager.requestAudioFocus(
-                        audioFocusChangeListener,
-                        AudioManager.STREAM_MUSIC,
-                        AudioManager.AUDIOFOCUS_GAIN
-                    )
+                    if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                        return
+                    }
                 }
+
                 registerReceiver(
                     becomingNoisyBroadcastReceiver,
                     IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
                 )
-
-                if (audioFocusResult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                    return
-                }
 
                 mediaSession.isActive = true
                 mediaSession.setPlaybackState(
@@ -169,16 +173,18 @@ class PlayerService : Service() {
 
             override fun onSkipToQueueItem(id: Long) {
                 super.onSkipToQueueItem(id)
-                val currentTrack = playerRepository.getCurrentTrack()
-                updateRelevantMetadata(currentTrack)
+                var currentTrack = playerRepository.getCurrentTrack()
 
                 if (id == exoPlayer?.currentWindowIndex?.toLong()) {
                     updateRelevantMetadata(currentTrack)
                     return
                 }
 
-                exoPlayer?.seekTo(id.toInt(), 0)
                 playerRepository.skipTo(id)
+                currentTrack = playerRepository.getCurrentTrack()
+                updateRelevantMetadata(currentTrack)
+
+                exoPlayer?.seekTo(id.toInt(), 0)
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM, id, 1f

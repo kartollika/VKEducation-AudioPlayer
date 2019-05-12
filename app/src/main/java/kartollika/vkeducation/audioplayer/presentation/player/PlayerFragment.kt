@@ -34,6 +34,7 @@ class PlayerFragment : Fragment() {
     private lateinit var playerService: PlayerService
     private var isPlayerBounded = false
     private var mediaController: MediaControllerCompat? = null
+    private var exoPlayer: ExoPlayer? = null
 
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
@@ -85,6 +86,7 @@ class PlayerFragment : Fragment() {
     }
 
     private fun initExoplayerStaff(exoPlayer: ExoPlayer?) {
+        this.exoPlayer = exoPlayer
         exo_controllers.player = exoPlayer
     }
 
@@ -156,9 +158,7 @@ class PlayerFragment : Fragment() {
 
     private fun setInitialAudioItem(mediaSessionCompat: MediaControllerCompat) {
         tracksRecyclerView.layoutManager?.smoothScrollToPosition(
-            tracksRecyclerView,
-            RecyclerView.State(),
-            mediaSessionCompat.playbackState?.position?.toInt() ?: 0
+            tracksRecyclerView, RecyclerView.State(), exoPlayer?.currentWindowIndex ?: 0
         )
         mediaControllerCallback.onPlaybackStateChanged(mediaSessionCompat.playbackState)
         mediaControllerCallback.onMetadataChanged(mediaSessionCompat.metadata)
