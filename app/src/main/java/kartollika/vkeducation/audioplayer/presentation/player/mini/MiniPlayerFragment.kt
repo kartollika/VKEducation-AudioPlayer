@@ -30,7 +30,7 @@ class MiniPlayerFragment : Fragment() {
     }
 
     private var isPlayerBounded = false
-    private lateinit var mediaController: MediaControllerCompat
+    private var mediaController: MediaControllerCompat? = null
     private var exoPlayer: ExoPlayer? = null
     private val handler: Handler = Handler()
 
@@ -65,7 +65,7 @@ class MiniPlayerFragment : Fragment() {
             playerService = (binder as PlayerService.AudioPlayerBinder).getService()
             initPlayerViews(playerService?.getExoPlayer())
             mediaController = MediaControllerCompat(context, binder.getMediaSessionToken())
-            mediaController.registerCallback(mediaControllerCallback)
+            mediaController?.registerCallback(mediaControllerCallback)
             isPlayerBounded = true
         }
 
@@ -122,13 +122,13 @@ class MiniPlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         playPauseActionView.setOnClickListener {
-            if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
-                mediaController.transportControls.pause()
+            if (mediaController?.playbackState?.state == PlaybackStateCompat.STATE_PLAYING) {
+                mediaController?.transportControls?.pause()
             } else {
-                mediaController.transportControls.play()
+                mediaController?.transportControls?.play()
             }
         }
-        nextTrackActionView.setOnClickListener { mediaController.transportControls.skipToNext() }
+        nextTrackActionView.setOnClickListener { mediaController?.transportControls?.skipToNext() }
     }
 
     override fun onAttach(context: Context?) {
@@ -139,7 +139,8 @@ class MiniPlayerFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         unbindService()
-        mediaController.unregisterCallback(mediaControllerCallback)
+        mediaController?.unregisterCallback(mediaControllerCallback)
+        mediaController = null
     }
 
     private fun unbindService() {
