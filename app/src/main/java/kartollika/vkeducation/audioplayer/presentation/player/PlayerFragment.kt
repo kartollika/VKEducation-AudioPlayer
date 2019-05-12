@@ -33,7 +33,7 @@ class PlayerFragment : Fragment() {
     private lateinit var tracksAdapter: AudioTracksAdapter
     private lateinit var playerService: PlayerService
     private var isPlayerBounded = false
-    private lateinit var mediaController: MediaControllerCompat
+    private var mediaController: MediaControllerCompat? = null
 
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
@@ -45,12 +45,13 @@ class PlayerFragment : Fragment() {
                         tracksRecyclerView, RecyclerView.State(), state.position.toInt()
                     )
                 }
-                PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM -> {
-                }
-                PlaybackStateCompat.STATE_PLAYING -> {
+
+                PlaybackStateCompat.STATE_PLAYING, PlaybackStateCompat.STATE_STOPPED -> {
+                    pausePlayActionView.setImageResource(R.drawable.ic_pause_48)
                 }
 
                 PlaybackStateCompat.STATE_PAUSED -> {
+                    pausePlayActionView.setImageResource(R.drawable.ic_play_48)
                 }
             }
         }
@@ -66,7 +67,7 @@ class PlayerFragment : Fragment() {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             playerService = (binder as PlayerService.AudioPlayerBinder).getService()
             mediaController = MediaControllerCompat(context, binder.getMediaSessionToken())
-            mediaController.registerCallback(mediaControllerCallback)
+            mediaController?.registerCallback(mediaControllerCallback)
             isPlayerBounded = true
             initializeInitialState()
             initExoplayerStaff(playerService.getExoPlayer())
@@ -75,6 +76,8 @@ class PlayerFragment : Fragment() {
 
         override fun onServiceDisconnected(name: ComponentName?) {
             isPlayerBounded = false
+            mediaController?.unregisterCallback(mediaControllerCallback)
+            mediaController = null
         }
     }
 
@@ -101,7 +104,8 @@ class PlayerFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         unbindService()
-        mediaController.unregisterCallback(mediaControllerCallback)
+        mediaController?.unregisterCallback(mediaControllerCallback)
+        mediaController = null
     }
 
     private fun initTracksRecyclerView() {
@@ -120,22 +124,20 @@ class PlayerFragment : Fragment() {
             object : SnapOnScrollListener.OnSnapPositionChangeListener {
                 override fun onSnapPositionChange(position: Int) {
                     if (playerService.getActiveTracks().isNotEmpty()) {
-                        mediaController.transportControls.skipToQueueItem(position.toLong())
+                        mediaController?.transportControls?.skipToQueueItem(position.toLong())
                     }
                 }
             })
     }
 
     private fun initListeners() {
-        previousTrackActionView.setOnClickListener { mediaController.transportControls.skipToPrevious() }
-        nextTrackActionView.setOnClickListener { mediaController.transportControls.skipToNext() }
+        previousTrackActionView.setOnClickListener { mediaController?.transportControls?.skipToPrevious() }
+        nextTrackActionView.setOnClickListener { mediaController?.transportControls?.skipToNext() }
         pausePlayActionView.setOnClickListener {
-            if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
-                mediaController.transportControls.pause()
-                pausePlayActionView.setImageResource(R.drawable.ic_play_48)
+            if (mediaController?.playbackState?.state == PlaybackStateCompat.STATE_PLAYING) {
+                mediaController?.transportControls?.pause()
             } else {
-                mediaController.transportControls.play()
-                pausePlayActionView.setImageResource(R.drawable.ic_pause_48)
+                mediaController?.transportControls?.play()
             }
         }
     }

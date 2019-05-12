@@ -68,11 +68,12 @@ class PlayerService : Service() {
                 mediaSessionCallbacks.onPlay()
             }
 
+            AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                mediaSessionCallbacks.onPause()
+            }
+
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
-                val streamType = exoPlayer!!.audioAttributes.usage
-                audioManager.setStreamVolume(
-                    streamType, audioManager.getStreamVolume(streamType) / 2, 0
-                )
+                mediaSessionCallbacks.onPause()
             }
 
             AudioManager.AUDIOFOCUS_LOSS -> {
@@ -257,7 +258,8 @@ class PlayerService : Service() {
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
 
             audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
-                .setAcceptsDelayedFocusGain(false)
+                .setAcceptsDelayedFocusGain(true)
+//                .setWillPauseWhenDucked(true)
                 .setOnAudioFocusChangeListener(audioFocusChangeListener)
                 .setAudioAttributes(audioAttributes).build()
         }
