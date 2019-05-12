@@ -34,7 +34,6 @@ class PlayerFragment : Fragment() {
     private lateinit var playerService: PlayerService
     private var isPlayerBounded = false
     private var mediaController: MediaControllerCompat? = null
-    private var exoPlayer: ExoPlayer? = null
 
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
@@ -60,9 +59,12 @@ class PlayerFragment : Fragment() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
             songNameTextView.text = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+                ?: getDefaultNoSongNameCaption()
             artistNameTextView.text = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
+                ?: getDefaultNoArtistCaption()
         }
     }
+
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -114,8 +116,8 @@ class PlayerFragment : Fragment() {
             onSetAudioTracksListener = object : AudioTracksAdapter.OnSetTracksListener {
                 override fun onSet(isEmpty: Boolean) {
                     if (isEmpty) {
-                        artistNameTextView.text = getString(R.string.no_tracks_title)
-                        songNameTextView.text = getString(R.string.no_tracks_summary)
+                        artistNameTextView.text = getDefaultNoArtistCaption()
+                        songNameTextView.text = getDefaultNoSongNameCaption()
                     }
                     changeControlsState(!isEmpty)
                 }
@@ -198,5 +200,10 @@ class PlayerFragment : Fragment() {
     }
 
     private fun getPlayerServiceIntent() = Intent(activity, PlayerService::class.java)
+
+    private fun getDefaultNoArtistCaption() = context?.getString(R.string.no_tracks_title) ?: ""
+
+    private fun getDefaultNoSongNameCaption(): String =
+        context?.getString(R.string.no_tracks_summary) ?: ""
 
 }
