@@ -94,7 +94,7 @@ class PlayerService : Service() {
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS,
-                        playerRepository.getCurrentIndex().toLong(),
+                        playerRepository.getCurrentIndexAsLong(),
                         1f
                     ).build()
                 )
@@ -132,7 +132,7 @@ class PlayerService : Service() {
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_PLAYING,
-                        PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+                        playerRepository.getCurrentIndexAsLong(),
                         1f
                     ).build()
                 )
@@ -158,7 +158,7 @@ class PlayerService : Service() {
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_STOPPED,
-                        PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+                        playerRepository.getCurrentIndexAsLong(),
                         1f
                     ).build()
                 )
@@ -169,11 +169,16 @@ class PlayerService : Service() {
 
             override fun onSkipToQueueItem(id: Long) {
                 super.onSkipToQueueItem(id)
-                exoPlayer?.seekTo(id.toInt(), 0)
-
-                playerRepository.skipTo(id)
                 val currentTrack = playerRepository.getCurrentTrack()
                 updateRelevantMetadata(currentTrack)
+
+                if (id == exoPlayer?.currentWindowIndex?.toLong()) {
+                    updateRelevantMetadata(currentTrack)
+                    return
+                }
+
+                exoPlayer?.seekTo(id.toInt(), 0)
+                playerRepository.skipTo(id)
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM, id, 1f
@@ -198,7 +203,7 @@ class PlayerService : Service() {
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_SKIPPING_TO_NEXT,
-                        playerRepository.getCurrentIndex().toLong(),
+                        playerRepository.getCurrentIndexAsLong(),
                         1f
                     ).build()
                 )
@@ -217,7 +222,7 @@ class PlayerService : Service() {
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_PAUSED,
-                        PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN,
+                        playerRepository.getCurrentIndexAsLong(),
                         1f
                     ).build()
                 )

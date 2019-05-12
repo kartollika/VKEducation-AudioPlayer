@@ -24,7 +24,7 @@ class SnapOnScrollListener(
     private val onSnapPositionChangeListener: OnSnapPositionChangeListener,
     private val behavior: Behavior) : RecyclerView.OnScrollListener() {
 
-    private var snapPosition = RecyclerView.NO_POSITION
+    private var snapPosition = 0
 
     enum class Behavior {
         NOTIFY_ON_SCROLL, NOTIFY_ON_SCROLL_IDLE

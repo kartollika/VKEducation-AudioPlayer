@@ -59,9 +59,12 @@ class PlayerFragment : Fragment() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
             songNameTextView.text = metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+                ?: getDefaultNoSongNameCaption()
             artistNameTextView.text = metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
+                ?: getDefaultNoArtistCaption()
         }
     }
+
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -69,8 +72,8 @@ class PlayerFragment : Fragment() {
             mediaController = MediaControllerCompat(context, binder.getMediaSessionToken())
             mediaController?.registerCallback(mediaControllerCallback)
             isPlayerBounded = true
-            initializeInitialState()
             initExoplayerStaff(playerService.getExoPlayer())
+            initializeInitialState(mediaController!!)
             changeControlsState(playerService.getActiveTracks().isNotEmpty())
         }
 
@@ -113,8 +116,8 @@ class PlayerFragment : Fragment() {
             onSetAudioTracksListener = object : AudioTracksAdapter.OnSetTracksListener {
                 override fun onSet(isEmpty: Boolean) {
                     if (isEmpty) {
-                        artistNameTextView.text = getString(R.string.no_tracks_title)
-                        songNameTextView.text = getString(R.string.no_tracks_summary)
+                        artistNameTextView.text = getDefaultNoArtistCaption()
+                        songNameTextView.text = getDefaultNoSongNameCaption()
                     }
                     changeControlsState(!isEmpty)
                 }
@@ -146,8 +149,19 @@ class PlayerFragment : Fragment() {
         }
     }
 
-    fun initializeInitialState() {
+    fun initializeInitialState(mediaSessionCompat: MediaControllerCompat) {
         fillTracks()
+        setInitialAudioItem(mediaSessionCompat)
+    }
+
+    private fun setInitialAudioItem(mediaSessionCompat: MediaControllerCompat) {
+        tracksRecyclerView.layoutManager?.smoothScrollToPosition(
+            tracksRecyclerView,
+            RecyclerView.State(),
+            mediaSessionCompat.playbackState?.position?.toInt() ?: 0
+        )
+        mediaControllerCallback.onPlaybackStateChanged(mediaSessionCompat.playbackState)
+        mediaControllerCallback.onMetadataChanged(mediaSessionCompat.metadata)
     }
 
     private fun fillTracks() {
@@ -186,5 +200,10 @@ class PlayerFragment : Fragment() {
     }
 
     private fun getPlayerServiceIntent() = Intent(activity, PlayerService::class.java)
+
+    private fun getDefaultNoArtistCaption() = context?.getString(R.string.no_tracks_title) ?: ""
+
+    private fun getDefaultNoSongNameCaption(): String =
+        context?.getString(R.string.no_tracks_summary) ?: ""
 
 }

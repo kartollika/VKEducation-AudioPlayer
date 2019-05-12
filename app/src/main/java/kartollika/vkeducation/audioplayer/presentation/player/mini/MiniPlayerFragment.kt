@@ -38,6 +38,8 @@ class MiniPlayerFragment : Fragment() {
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
+            updateSongLeft()
+
             when (state?.state) {
                 PlaybackStateCompat.STATE_PLAYING -> {
                     playPauseActionView.setImageResource(R.drawable.ic_pause_28)
@@ -66,6 +68,8 @@ class MiniPlayerFragment : Fragment() {
             initPlayerViews(playerService?.getExoPlayer())
             mediaController = MediaControllerCompat(context, binder.getMediaSessionToken())
             mediaController?.registerCallback(mediaControllerCallback)
+
+            initializeInitialState(mediaController!!)
             isPlayerBounded = true
         }
 
@@ -74,13 +78,17 @@ class MiniPlayerFragment : Fragment() {
         }
     }
 
+    private fun initializeInitialState(mediaController: MediaControllerCompat) {
+        mediaControllerCallback.onPlaybackStateChanged(mediaController.playbackState)
+        mediaControllerCallback.onMetadataChanged(mediaController.metadata)
+    }
+
     private fun initPlayerViews(exoPlayer: ExoPlayer?) {
         this.exoPlayer = exoPlayer
         exoPlayer?.addListener(object : Player.EventListener {
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
-                updateSongLeft()
             }
         })
     }
