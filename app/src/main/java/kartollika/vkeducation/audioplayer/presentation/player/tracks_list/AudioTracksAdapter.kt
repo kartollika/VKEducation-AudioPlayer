@@ -11,8 +11,6 @@ class AudioTracksAdapter(audioTracks: List<AudioTrack> = mutableListOf()) :
 
     private val dummyView = 1
     private val dummyAudioTrack = AudioTrack(
-        artist = "Треков нет",
-        title = "Выберите треки и приходите обратно :)",
         albumArt = R.drawable.ic_baseline_music_off_24px
     )
     private val defaultTrackView = 0
@@ -25,7 +23,7 @@ class AudioTracksAdapter(audioTracks: List<AudioTrack> = mutableListOf()) :
 
     var audioTracks: List<AudioTrack> = audioTracks
         set(value) {
-            onSetAudioTracksListener?.onSet(audioTracks.isEmpty())
+            onSetAudioTracksListener?.onSet(value.isEmpty())
             field = value
         }
 
