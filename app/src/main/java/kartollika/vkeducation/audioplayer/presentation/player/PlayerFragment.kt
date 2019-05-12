@@ -104,6 +104,9 @@ class PlayerFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initTracksRecyclerView()
         initListeners()
+
+        songNameTextView.isSelected = true
+        artistNameTextView.isSelected = true
     }
 
     override fun onDestroy() {
