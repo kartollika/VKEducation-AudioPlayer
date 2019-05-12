@@ -4,7 +4,6 @@ import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.database.Cursor
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
@@ -93,8 +92,10 @@ class PlayerService : Service() {
         fun onQuery(tracks: List<AudioTrack>)
     }
 
+    private var loaderListener: Loader.OnLoadCompleteListener<Cursor?>? = null
+
     private fun getOnLoadCompleteListener(listener: OnQueryListener): Loader.OnLoadCompleteListener<Cursor?> {
-        return Loader.OnLoadCompleteListener { p0, cursor ->
+        loaderListener = Loader.OnLoadCompleteListener { _, cursor ->
             val tracks = mutableListOf<AudioTrack>()
             cursor?.let {
                 while (cursor.moveToNext()) {
@@ -115,6 +116,7 @@ class PlayerService : Service() {
             }
             listener.onQuery(tracks)
         }
+        return loaderListener!!
     }
 
     private val mediaSessionCallbacks: MediaSessionCompat.Callback =
@@ -179,14 +181,14 @@ class PlayerService : Service() {
                             return
                         }
                     }
+                    /*registerReceiver(
+                        becomingNoisyBroadcastReceiver,
+                        IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+                    )*/
                 }
 
-                registerReceiver(
-                    becomingNoisyBroadcastReceiver,
-                    IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-                )
-
                 mediaSession.isActive = true
+
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_PLAYING,
@@ -203,8 +205,10 @@ class PlayerService : Service() {
 
                 if (exoPlayer?.playWhenReady == true) {
                     exoPlayer?.playWhenReady = false
-                    unregisterReceiver(becomingNoisyBroadcastReceiver)
+//                    unregisterReceiver(becomingNoisyBroadcastReceiver)
                 }
+
+                mediaSession.isActive = false
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     audioManager.abandonAudioFocusRequest(audioFocusRequest)
@@ -212,7 +216,6 @@ class PlayerService : Service() {
                     audioManager.abandonAudioFocus(audioFocusChangeListener)
                 }
 
-                mediaSession.isActive = false
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
                         PlaybackStateCompat.STATE_STOPPED,
@@ -290,7 +293,7 @@ class PlayerService : Service() {
 
                 if (exoPlayer?.playWhenReady == true) {
                     exoPlayer?.playWhenReady = false
-                    unregisterReceiver(becomingNoisyBroadcastReceiver)
+//                    unregisterReceiver(becomingNoisyBroadcastReceiver)
                 }
 
                 mediaSession.setPlaybackState(
@@ -316,8 +319,8 @@ class PlayerService : Service() {
                 cursorLoader!!.registerListener(
                     1, getOnLoadCompleteListener(object : OnQueryListener {
                         override fun onQuery(tracks: List<AudioTrack>) {
-                            reloadTracks(path, tracks)
-                            if (needToStart && tracks.isNotEmpty()) {
+                            val reloadType = reloadTracks(path, tracks)
+                            if (needToStart && tracks.isNotEmpty() && reloadType == ReloadType.Cold) {
                                 onPlay()
                                 return
                             }
@@ -368,7 +371,6 @@ class PlayerService : Service() {
 
             audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
                 .setAcceptsDelayedFocusGain(true)
-//                .setWillPauseWhenDucked(true)
                 .setOnAudioFocusChangeListener(audioFocusChangeListener)
                 .setAudioAttributes(audioAttributes).build()
         }
@@ -394,6 +396,11 @@ class PlayerService : Service() {
         super.onDestroy()
         mediaSession.release()
         exoPlayer?.release()
+        if (cursorLoader != null) {
+            cursorLoader!!.unregisterListener(loaderListener!!)
+            cursorLoader!!.cancelLoad()
+            cursorLoader!!.stopLoading()
+        }
     }
 
     fun addOnTracksChangedListener(tracksChangesListener: OnTracksChangesListener) {
@@ -433,20 +440,27 @@ class PlayerService : Service() {
         mediaSessionCallbacks.onPlayFromUri(Uri.parse(folder), null)
     }
 
-    private fun reloadTracks(folderPath: String, tracks: List<AudioTrack>) {
-        if (folderPath != lastPlayedDirectory) {
+    enum class ReloadType {
+        Cold, Hot
+    }
+
+    private fun reloadTracks(folderPath: String, tracks: List<AudioTrack>): ReloadType {
+        val reloadType = if (folderPath != lastPlayedDirectory) {
             mediaSessionCallbacks.onStop()
             lastPlayedDirectory = folderPath
             mediaSource = doColdTracksReload(tracks)
             prepareToPlay(mediaSource)
+            ReloadType.Cold
         } else {
             doHotTracksReload(tracks)
+            ReloadType.Hot
         }
         playerRepository.audioTracks =
             tracks.associateBy { audioTrack: AudioTrack -> audioTrack.uri.toString() }
 
         invalidateValidTracks()
         onTracksChangesListener?.onTracksChanged(getActiveTracks())
+        return reloadType
     }
 
     private fun doColdTracksReload(tracks: List<AudioTrack>): ConcatenatingMediaSource {
@@ -607,7 +621,7 @@ class PlayerService : Service() {
                 )
             )
             setOnlyAlertOnce(true)
-            setSmallIcon(R.mipmap.ic_launcher).setChannelId(notificationChannel).setShowWhen(false)
+            setSmallIcon(R.mipmap.ic_launcher).setShowWhen(false)
             priority = NotificationCompat.PRIORITY_HIGH
         }
         return builder.build()
