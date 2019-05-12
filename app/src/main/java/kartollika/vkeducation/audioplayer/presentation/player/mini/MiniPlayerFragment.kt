@@ -143,6 +143,7 @@ class MiniPlayerFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         unbindService()
+        mediaController.unregisterCallback(mediaControllerCallback)
     }
 
     private fun unbindService() {

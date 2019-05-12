@@ -1,8 +1,6 @@
 package kartollika.vkeducation.audioplayer.player
 
-import android.app.Notification
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -48,6 +46,8 @@ class PlayerService : Service() {
     private lateinit var audioManager: AudioManager
     private lateinit var audioFocusRequest: AudioFocusRequest
 
+    private val notificationId = 234
+    private val notificationChannel = PlayerService::class.java.name
     private var metadataBuilder = MediaMetadataCompat.Builder()
 
     private val stateBuilder: PlaybackStateCompat.Builder = Builder().setActions(
@@ -141,15 +141,17 @@ class PlayerService : Service() {
 
             override fun onStop() {
                 super.onStop()
-                exoPlayer?.playWhenReady = false
+
+                if (exoPlayer?.playWhenReady == true) {
+                    exoPlayer?.playWhenReady = false
+                    unregisterReceiver(becomingNoisyBroadcastReceiver)
+                }
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     audioManager.abandonAudioFocusRequest(audioFocusRequest)
                 } else {
                     audioManager.abandonAudioFocus(audioFocusChangeListener)
                 }
-
-                unregisterReceiver(becomingNoisyBroadcastReceiver)
 
                 mediaSession.isActive = false
                 mediaSession.setPlaybackState(
@@ -161,6 +163,7 @@ class PlayerService : Service() {
                 )
 
                 updateForegroundNotification()
+                stopSelf()
             }
 
             override fun onSkipToQueueItem(id: Long) {
@@ -204,9 +207,11 @@ class PlayerService : Service() {
 
             override fun onPause() {
                 super.onPause()
-                exoPlayer?.playWhenReady = false
 
-                unregisterReceiver(becomingNoisyBroadcastReceiver)
+                if (exoPlayer?.playWhenReady == true) {
+                    exoPlayer?.playWhenReady = false
+                    unregisterReceiver(becomingNoisyBroadcastReceiver)
+                }
 
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
@@ -241,6 +246,13 @@ class PlayerService : Service() {
         initMediaSession()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val notificationChannel = NotificationChannel(
+                notificationChannel, "VK Education Player", NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val notificationManager: NotificationManager =
+                applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(notificationChannel)
+
             val audioAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA)
                 .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()
 
@@ -395,8 +407,10 @@ class PlayerService : Service() {
         with(builder) {
             addAction(
                 NotificationCompat.Action.Builder(
-                    R.mipmap.ic_launcher, "next", MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        applicationContext, PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                    R.drawable.ic_skip_previous_48,
+                    "Next",
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        applicationContext, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
                     )
                 ).build()
             )
@@ -411,8 +425,7 @@ class PlayerService : Service() {
                         )
                     ).build()
                 )
-            }
-            if (state.state == PlaybackStateCompat.STATE_PAUSED) {
+            } else {
                 addAction(
                     NotificationCompat.Action.Builder(
                         R.drawable.ic_play_28,
@@ -423,15 +436,28 @@ class PlayerService : Service() {
                     ).build()
                 )
             }
+
+            addAction(
+                NotificationCompat.Action.Builder(
+                    R.drawable.ic_skip_next_48,
+                    "Next",
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        applicationContext, PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                    )
+                ).build()
+            )
+
+
             setStyle(
-                MediaStyle().setShowActionsInCompactView(1).setMediaSession(mediaSession.sessionToken).setShowCancelButton(
+                MediaStyle().setShowActionsInCompactView(0, 1, 2).setShowCancelButton(
                     true
                 ).setCancelButtonIntent(
-                        MediaButtonReceiver.buildMediaButtonPendingIntent(
-                            applicationContext, PlaybackStateCompat.ACTION_STOP
-                        )
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        applicationContext, PlaybackStateCompat.ACTION_STOP
                     )
+                )
             )
+            setSmallIcon(R.mipmap.ic_launcher)
             setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_HIGH
         }
