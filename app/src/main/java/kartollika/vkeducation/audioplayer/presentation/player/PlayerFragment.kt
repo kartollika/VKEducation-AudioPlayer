@@ -45,12 +45,13 @@ class PlayerFragment : Fragment() {
                         tracksRecyclerView, RecyclerView.State(), state.position.toInt()
                     )
                 }
-                PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM -> {
-                }
-                PlaybackStateCompat.STATE_PLAYING -> {
+
+                PlaybackStateCompat.STATE_PLAYING, PlaybackStateCompat.STATE_STOPPED -> {
+                    pausePlayActionView.setImageResource(R.drawable.ic_pause_48)
                 }
 
                 PlaybackStateCompat.STATE_PAUSED -> {
+                    pausePlayActionView.setImageResource(R.drawable.ic_play_48)
                 }
             }
         }
@@ -132,10 +133,8 @@ class PlayerFragment : Fragment() {
         pausePlayActionView.setOnClickListener {
             if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
                 mediaController.transportControls.pause()
-                pausePlayActionView.setImageResource(R.drawable.ic_play_48)
             } else {
                 mediaController.transportControls.play()
-                pausePlayActionView.setImageResource(R.drawable.ic_pause_48)
             }
         }
     }

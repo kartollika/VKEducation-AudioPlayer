@@ -39,14 +39,10 @@ class MiniPlayerFragment : Fragment() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             super.onPlaybackStateChanged(state)
             when (state?.state) {
-                PlaybackStateCompat.STATE_SKIPPING_TO_NEXT, PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS -> {
-                }
-                PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM -> {
-                }
                 PlaybackStateCompat.STATE_PLAYING -> {
                     playPauseActionView.setImageResource(R.drawable.ic_pause_28)
                 }
-                PlaybackStateCompat.STATE_PAUSED -> {
+                PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.STATE_STOPPED -> {
                     playPauseActionView.setImageResource(R.drawable.ic_play_28)
                 }
             }
@@ -128,7 +124,7 @@ class MiniPlayerFragment : Fragment() {
         playPauseActionView.setOnClickListener {
             if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
                 mediaController.transportControls.pause()
-            } else  {
+            } else {
                 mediaController.transportControls.play()
             }
         }
