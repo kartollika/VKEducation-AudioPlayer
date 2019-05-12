@@ -101,6 +101,7 @@ class PlayerFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         unbindService()
+        mediaController.unregisterCallback(mediaControllerCallback)
     }
 
     private fun initTracksRecyclerView() {
@@ -132,7 +133,7 @@ class PlayerFragment : Fragment() {
             if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
                 mediaController.transportControls.pause()
                 pausePlayActionView.setImageResource(R.drawable.ic_play_48)
-            } else if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
+            } else {
                 mediaController.transportControls.play()
                 pausePlayActionView.setImageResource(R.drawable.ic_pause_48)
             }
