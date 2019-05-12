@@ -88,7 +88,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 if (resultCode == Activity.RESULT_OK) {
                     val folder = data?.getStringExtra("chosen_folder") ?: return
                     PreferencesUtils(this).saveLastPlayedDirectory(folder)
-                    playerService?.reloadTracksFromOutsize(folder)
+                    playerService?.reloadPlayTracksFromOutsize(folder)
                 }
             }
             101 -> {

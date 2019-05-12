@@ -4,6 +4,7 @@ import android.app.*
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.database.Cursor
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
@@ -57,7 +58,7 @@ class PlayerService : Service() {
     private var metadataBuilder = MediaMetadataCompat.Builder()
 
     private val stateBuilder: PlaybackStateCompat.Builder = Builder().setActions(
-        ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS or ACTION_PLAY_FROM_URI or ACTION_PREPARE_FROM_URI
+        ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS or ACTION_PLAY_FROM_URI
     )
 
     private val becomingNoisyBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -122,11 +123,6 @@ class PlayerService : Service() {
     private val mediaSessionCallbacks: MediaSessionCompat.Callback =
         object : MediaSessionCompat.Callback() {
 
-            override fun onPrepareFromUri(uri: Uri?, extras: Bundle?) {
-                super.onPrepareFromUri(uri, extras)
-                startLoadingAudiosData(uri, needToStart = false)
-            }
-
             override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
                 super.onPlayFromUri(uri, extras)
                 startLoadingAudiosData(uri, needToStart = true)
@@ -181,10 +177,10 @@ class PlayerService : Service() {
                             return
                         }
                     }
-                    /*registerReceiver(
+                    registerReceiver(
                         becomingNoisyBroadcastReceiver,
                         IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-                    )*/
+                    )
                 }
 
                 mediaSession.isActive = true
@@ -205,7 +201,7 @@ class PlayerService : Service() {
 
                 if (exoPlayer?.playWhenReady == true) {
                     exoPlayer?.playWhenReady = false
-//                    unregisterReceiver(becomingNoisyBroadcastReceiver)
+                    unregisterReceiver(becomingNoisyBroadcastReceiver)
                 }
 
                 mediaSession.isActive = false
@@ -293,7 +289,7 @@ class PlayerService : Service() {
 
                 if (exoPlayer?.playWhenReady == true) {
                     exoPlayer?.playWhenReady = false
-//                    unregisterReceiver(becomingNoisyBroadcastReceiver)
+                    unregisterReceiver(becomingNoisyBroadcastReceiver)
                 }
 
                 mediaSession.setPlaybackState(
@@ -325,9 +321,9 @@ class PlayerService : Service() {
                                 return
                             }
 
-                            if (tracks.isEmpty()) {
-                                onStop()
-                            }
+//                            if (tracks.isEmpty()) {
+//                                onStop()
+//                            }
                         }
                     })
                 )
@@ -436,7 +432,11 @@ class PlayerService : Service() {
         }
     }
 
-    fun reloadTracksFromOutsize(folder: String) {
+//    fun reloadTracksFromOutsize(folder: String) {
+//        mediaSessionCallbacks.onPrepareFromUri(Uri.parse(folder), null)
+//    }
+
+    fun reloadPlayTracksFromOutsize(folder: String) {
         mediaSessionCallbacks.onPlayFromUri(Uri.parse(folder), null)
     }
 
@@ -446,7 +446,10 @@ class PlayerService : Service() {
 
     private fun reloadTracks(folderPath: String, tracks: List<AudioTrack>): ReloadType {
         val reloadType = if (folderPath != lastPlayedDirectory) {
-            mediaSessionCallbacks.onStop()
+            if (exoPlayer?.playWhenReady == true) {
+                mediaSessionCallbacks.onPause()
+            }
+
             lastPlayedDirectory = folderPath
             mediaSource = doColdTracksReload(tracks)
             prepareToPlay(mediaSource)
@@ -547,13 +550,13 @@ class PlayerService : Service() {
         when (playbackState.state) {
             PlaybackStateCompat.STATE_PLAYING -> {
                 startForeground(
-                    notificationId, getNotificationForState(playbackState)
+                    12, getNotificationForState(playbackState)
                 )
             }
 
             PlaybackStateCompat.STATE_PAUSED -> {
                 NotificationManagerCompat.from(applicationContext)
-                    .notify(notificationId, getNotificationForState(playbackState))
+                    .notify(12, getNotificationForState(playbackState))
                 stopForeground(false)
             }
 
