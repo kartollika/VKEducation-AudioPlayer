@@ -58,7 +58,7 @@ class PlayerService : Service() {
     private var metadataBuilder = MediaMetadataCompat.Builder()
 
     private val stateBuilder: PlaybackStateCompat.Builder = Builder().setActions(
-        ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS or ACTION_PLAY_FROM_URI
+        ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS or ACTION_PLAY_FROM_URI or ACTION_PREPARE_FROM_URI
     )
 
     private val becomingNoisyBroadcastReceiver: BroadcastReceiver = object : BroadcastReceiver() {
@@ -117,31 +117,17 @@ class PlayerService : Service() {
         }
     }
 
-
     private val mediaSessionCallbacks: MediaSessionCompat.Callback =
         object : MediaSessionCompat.Callback() {
 
+            override fun onPrepareFromUri(uri: Uri?, extras: Bundle?) {
+                super.onPrepareFromUri(uri, extras)
+                startLoadingAudiosData(uri, needToStart = false)
+            }
+
             override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
                 super.onPlayFromUri(uri, extras)
-
-                val path = uri.toString()
-                val uriQuery = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
-                val selection =
-                    MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DATA + " like ? AND " + MediaStore.Audio.Media.DATA + " NOT LIKE ? "
-                val selectionArgs = arrayOf("%$path%", "%$path/%/%")
-                cursorLoader = CursorLoader(
-                    applicationContext, uriQuery, null, selection, selectionArgs, null
-                )
-
-                cursorLoader!!.registerListener(
-                    1, getOnLoadCompleteListener(object : OnQueryListener {
-                        override fun onQuery(tracks: List<AudioTrack>) {
-                            reloadTracks(path, tracks)
-                            onPlay()
-                        }
-                    })
-                )
-                cursorLoader!!.startLoading()
+                startLoadingAudiosData(uri, needToStart = true)
             }
 
             override fun onSkipToPrevious() {
@@ -316,6 +302,34 @@ class PlayerService : Service() {
                 )
                 updateForegroundNotification()
             }
+
+            private fun startLoadingAudiosData(uri: Uri?, needToStart: Boolean) {
+                val path = uri.toString()
+                val uriQuery = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
+                val selection =
+                    MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DATA + " like ? AND " + MediaStore.Audio.Media.DATA + " NOT LIKE ? "
+                val selectionArgs = arrayOf("%$path%", "%$path/%/%")
+                cursorLoader = CursorLoader(
+                    applicationContext, uriQuery, null, selection, selectionArgs, null
+                )
+
+                cursorLoader!!.registerListener(
+                    1, getOnLoadCompleteListener(object : OnQueryListener {
+                        override fun onQuery(tracks: List<AudioTrack>) {
+                            reloadTracks(path, tracks)
+                            if (needToStart && tracks.isNotEmpty()) {
+                                onPlay()
+                                return
+                            }
+
+                            if (tracks.isEmpty()) {
+                                onStop()
+                            }
+                        }
+                    })
+                )
+                cursorLoader!!.startLoading()
+            }
         }
 
     private fun updateRelevantMetadata(track: AudioTrack) {
@@ -421,6 +435,7 @@ class PlayerService : Service() {
 
     private fun reloadTracks(folderPath: String, tracks: List<AudioTrack>) {
         if (folderPath != lastPlayedDirectory) {
+            mediaSessionCallbacks.onStop()
             lastPlayedDirectory = folderPath
             mediaSource = doColdTracksReload(tracks)
             prepareToPlay(mediaSource)
@@ -592,7 +607,7 @@ class PlayerService : Service() {
                 )
             )
             setOnlyAlertOnce(true)
-            setSmallIcon(R.mipmap.ic_launcher).setChannelId(notificationChannel)
+            setSmallIcon(R.mipmap.ic_launcher).setChannelId(notificationChannel).setShowWhen(false)
             priority = NotificationCompat.PRIORITY_HIGH
         }
         return builder.build()
