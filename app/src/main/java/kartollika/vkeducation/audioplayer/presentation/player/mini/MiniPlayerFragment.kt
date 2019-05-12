@@ -128,7 +128,7 @@ class MiniPlayerFragment : Fragment() {
         playPauseActionView.setOnClickListener {
             if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
                 mediaController.transportControls.pause()
-            } else if (mediaController.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
+            } else  {
                 mediaController.transportControls.play()
             }
         }
