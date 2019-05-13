@@ -9,18 +9,16 @@ import android.support.v4.media.session.PlaybackStateCompat
 class PlayerNotificationHelper {
 
     companion object {
-        fun instanciateNotificationWithContent(
+        fun instantiateNotificationWithContent(
             context: Context, mediaSessionCompat: MediaSessionCompat): NotificationCompat.Builder {
             val metadataDescription = mediaSessionCompat.controller.metadata.description
-            return NotificationCompat.Builder(context)
-                .setContentTitle(metadataDescription.title)
-                .setContentText(metadataDescription.subtitle)
-                .setLargeIcon(metadataDescription.iconBitmap).setDeleteIntent(
+            return NotificationCompat.Builder(context).setContentTitle(metadataDescription?.title)
+                .setContentText(metadataDescription?.subtitle)
+                .setLargeIcon(metadataDescription?.iconBitmap).setDeleteIntent(
                     MediaButtonReceiver.buildMediaButtonPendingIntent(
                         context, PlaybackStateCompat.ACTION_STOP
                     )
-                )
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                ).setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
         }
     }
 }

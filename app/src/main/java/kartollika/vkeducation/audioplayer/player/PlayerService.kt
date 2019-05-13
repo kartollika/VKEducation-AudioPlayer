@@ -54,7 +54,7 @@ class PlayerService : Service() {
 
     private val notificationId = 234
     private var cursorLoader: CursorLoader? = null
-    private val notificationChannel = PlayerService::class.java.name
+    private val notificationChannelId = PlayerService::class.java.name
     private var metadataBuilder = MediaMetadataCompat.Builder()
 
     private val stateBuilder: PlaybackStateCompat.Builder = Builder().setActions(
@@ -320,10 +320,6 @@ class PlayerService : Service() {
                                 onPlay()
                                 return
                             }
-
-//                            if (tracks.isEmpty()) {
-//                                onStop()
-//                            }
                         }
                     })
                 )
@@ -350,13 +346,15 @@ class PlayerService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = binder
 
+    private lateinit var notificationChannel: NotificationChannel
+
     override fun onCreate() {
         super.onCreate()
         initMediaSession()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(
-                notificationChannel, "VK Education Player", NotificationManager.IMPORTANCE_DEFAULT
+            notificationChannel = NotificationChannel(
+                notificationChannelId, "VK Education Player", NotificationManager.IMPORTANCE_DEFAULT
             )
             val notificationManager: NotificationManager =
                 applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -369,6 +367,12 @@ class PlayerService : Service() {
                 .setAcceptsDelayedFocusGain(true)
                 .setOnAudioFocusChangeListener(audioFocusChangeListener)
                 .setAudioAttributes(audioAttributes).build()
+
+            val notification =
+                NotificationCompat.Builder(this, notificationChannelId).setContentTitle("")
+                    .setContentText("").build()
+
+            startForeground(notificationId, notification)
         }
 
         val mediaButtonIntent = Intent(
@@ -550,13 +554,13 @@ class PlayerService : Service() {
         when (playbackState.state) {
             PlaybackStateCompat.STATE_PLAYING -> {
                 startForeground(
-                    12, getNotificationForState(playbackState)
+                    notificationId, getNotificationForState(playbackState)
                 )
             }
 
             PlaybackStateCompat.STATE_PAUSED -> {
                 NotificationManagerCompat.from(applicationContext)
-                    .notify(12, getNotificationForState(playbackState))
+                    .notify(notificationId, getNotificationForState(playbackState))
                 stopForeground(false)
             }
 
@@ -568,7 +572,7 @@ class PlayerService : Service() {
 
     private fun getNotificationForState(state: PlaybackStateCompat): Notification {
         val builder =
-            PlayerNotificationHelper.instanciateNotificationWithContent(this, mediaSession)
+            PlayerNotificationHelper.instantiateNotificationWithContent(this, mediaSession)
 
         with(builder) {
             addAction(
@@ -625,6 +629,10 @@ class PlayerService : Service() {
             )
             setOnlyAlertOnce(true)
             setSmallIcon(R.mipmap.ic_launcher).setShowWhen(false)
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                setChannelId(notificationChannelId)
+            }
             priority = NotificationCompat.PRIORITY_HIGH
         }
         return builder.build()
