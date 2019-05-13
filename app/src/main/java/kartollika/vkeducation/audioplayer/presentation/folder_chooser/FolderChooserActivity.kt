@@ -67,9 +67,11 @@ class FolderChooserActivity : AppCompatActivity() {
     }
 
     private fun initStartFolders() {
-        ContextCompat.getExternalFilesDirs(this, null)
         val appsDir = ContextCompat.getExternalFilesDirs(this, null)
         for (file in appsDir) {
+            if (file == null) {
+                continue
+            }
             roots.add(file.parentFile.parentFile.parentFile.parentFile.absolutePath)
         }
     }
