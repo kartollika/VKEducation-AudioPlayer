@@ -103,54 +103,61 @@
 
         </LinearLayout>
 
-        <com.google.android.exoplayer2.ui.PlayerControlView
-
-            android:id="@+id/exo_controllers"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/default_double_horizontal_margin"
-            android:layout_marginTop="16dp"
-            android:layout_marginRight="@dimen/default_double_horizontal_margin"
-            app:controller_layout_id="@layout/player_controls"
-            app:show_timeout="0">
-
-        </com.google.android.exoplayer2.ui.PlayerControlView>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="24dp"
-            android:orientation="horizontal">
-
-            <ImageButton
-                android:id="@+id/previousTrackActionView"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center"
-                android:background="@drawable/ic_mini_player_next_28"
-                android:scaleX="-1" />
-
-            <ImageButton
-                android:id="@+id/pausePlayActionView"
-                android:layout_width="72dp"
-                android:layout_height="72dp"
-                android:layout_marginLeft="42dp"
-                android:layout_marginRight="42dp"
-                android:background="@drawable/standart_circle_button_gradient"
-                android:padding="12dp"
-                android:src="@drawable/ic_pause_48" />
-
-            <ImageView
-                android:id="@+id/nextTrackActionView"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_mini_player_next_28" />
-        </LinearLayout>
-
-
     </LinearLayout>
+
+    <com.google.android.exoplayer2.ui.PlayerControlView
+
+        android:id="@+id/exo_controllers"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/default_double_horizontal_margin"
+        android:layout_marginTop="@dimen/default_vertical_margin"
+        android:layout_marginEnd="@dimen/default_double_horizontal_margin"
+        app:controller_layout_id="@layout/player_controls"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/root"
+        app:show_timeout="0" />
+
+
+    <ImageButton
+        android:id="@+id/previousTrackActionView"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:layout_marginEnd="46dp"
+        android:background="@drawable/ic_mini_player_next_28"
+        android:scaleX="-1"
+        app:layout_constraintBottom_toBottomOf="@+id/pausePlayActionView"
+        app:layout_constraintEnd_toStartOf="@+id/pausePlayActionView"
+        app:layout_constraintTop_toTopOf="@+id/pausePlayActionView" />
+
+    <ImageButton
+        android:id="@+id/pausePlayActionView"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/standart_circle_button_gradient"
+        android:elevation="12dp"
+        android:padding="4dp"
+        android:src="@drawable/ic_pause_48"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/exo_controllers" />
+
+    <ImageView
+        android:id="@+id/nextTrackActionView"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="46dp"
+        android:src="@drawable/ic_mini_player_next_28"
+        app:layout_constraintBottom_toBottomOf="@+id/pausePlayActionView"
+        app:layout_constraintStart_toEndOf="@+id/pausePlayActionView"
+        app:layout_constraintTop_toTopOf="@+id/pausePlayActionView" />
+
 
     <ImageView
         android:id="@+id/shuffleActionView"
@@ -160,6 +167,7 @@
         android:layout_marginStart="14dp"
         android:layout_marginBottom="14dp"
         android:background="@drawable/standart_circle_button_gradient"
+        android:elevation="12dp"
         android:padding="12dp"
         android:src="@drawable/ic_shuffle_24"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -173,6 +181,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="14dp"
         android:background="@drawable/standart_circle_button_gradient"
+        android:elevation="12dp"
         android:padding="12dp"
         android:src="@drawable/ic_repeat_24"
         app:layout_constraintBottom_toBottomOf="parent"
