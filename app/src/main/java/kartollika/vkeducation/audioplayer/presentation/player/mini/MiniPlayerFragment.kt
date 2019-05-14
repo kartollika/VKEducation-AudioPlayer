@@ -106,10 +106,13 @@ class MiniPlayerFragment : Fragment() {
             exoPlayer?.playbackState
         }
 
-        durationSongLengthView?.text =
-            "-${(exoPlayer!!.duration - exoPlayer!!.currentPosition).parseIntToLength()}"
-
         if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) {
+
+            if (playbackState == Player.STATE_READY) {
+                durationSongLengthView?.text =
+                    "-${(exoPlayer!!.duration - exoPlayer!!.currentPosition).parseIntToLength()}"
+            }
+
             var delayMs = 1000 - (exoPlayer!!.currentPosition % 1000)
             if (delayMs < 200) {
                 delayMs += 1000
