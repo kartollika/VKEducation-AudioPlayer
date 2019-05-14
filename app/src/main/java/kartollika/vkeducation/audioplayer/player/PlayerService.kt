@@ -56,6 +56,7 @@ class PlayerService : Service() {
     private var cursorLoader: CursorLoader? = null
     private val notificationChannelId = PlayerService::class.java.name
     private var metadataBuilder = MediaMetadataCompat.Builder()
+    private val tracksChangesListeners: MutableList<OnTracksChangesListener> = mutableListOf()
 
     private val stateBuilder: PlaybackStateCompat.Builder = Builder().setActions(
         ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS or ACTION_PLAY_FROM_URI
@@ -404,7 +405,7 @@ class PlayerService : Service() {
     }
 
     fun addOnTracksChangedListener(tracksChangesListener: OnTracksChangesListener) {
-        this.onTracksChangesListener = tracksChangesListener
+        tracksChangesListeners.add(tracksChangesListener)
     }
 
     private var validActiveTracks: List<AudioTrack> = mutableListOf()
@@ -464,10 +465,14 @@ class PlayerService : Service() {
         }
         playerRepository.audioTracks =
             tracks.associateBy { audioTrack: AudioTrack -> audioTrack.uri.toString() }
-
         invalidateValidTracks()
-        onTracksChangesListener?.onTracksChanged(getActiveTracks())
+        notifyAllOnTracksChangedListeners()
         return reloadType
+    }
+
+    private fun notifyAllOnTracksChangedListeners() {
+        val activeTracks = getActiveTracks()
+        tracksChangesListeners.forEach { it.onTracksChanged(activeTracks) }
     }
 
     private fun doColdTracksReload(tracks: List<AudioTrack>): ConcatenatingMediaSource {

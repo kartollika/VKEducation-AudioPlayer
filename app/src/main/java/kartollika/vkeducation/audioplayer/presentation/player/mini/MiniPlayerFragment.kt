@@ -20,6 +20,7 @@ import com.google.android.exoplayer2.Player
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.common.utils.parseIntToLength
 import kartollika.vkeducation.audioplayer.common.utils.setImageResource
+import kartollika.vkeducation.audioplayer.player.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kotlinx.android.synthetic.main.view_mini_player.*
 
@@ -56,10 +57,13 @@ class MiniPlayerFragment : Fragment() {
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
-            metadata?.let {
-                songNameTextView.text = it.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+            if (metadata == null) {
+                songNameTextView.text = ""
+                albumPreviewImageView.setImageDrawable(null)
+            } else {
+                songNameTextView.text = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
                 albumPreviewImageView.setImageResource(
-                    it.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)
+                    metadata.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)
                         ?: R.drawable.images
                 )
             }
@@ -69,9 +73,10 @@ class MiniPlayerFragment : Fragment() {
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
             playerService = (binder as PlayerService.AudioPlayerBinder).getService()
-            initPlayerViews(playerService?.getExoPlayer())
+            initPlayerViews(playerService.getExoPlayer())
             mediaController = MediaControllerCompat(context, binder.getMediaSessionToken())
             mediaController?.registerCallback(mediaControllerCallback)
+            initMediaListeners()
 
             initializeInitialState(mediaController!!)
             isPlayerBounded = true
@@ -80,6 +85,16 @@ class MiniPlayerFragment : Fragment() {
         override fun onServiceDisconnected(name: ComponentName?) {
             isPlayerBounded = false
         }
+    }
+
+    private fun initMediaListeners() {
+        playerService.addOnTracksChangedListener(object : PlayerService.OnTracksChangesListener {
+            override fun onTracksChanged(tracks: List<AudioTrack>) {
+                if (tracks.isEmpty()) {
+                    mediaControllerCallback.onMetadataChanged(null)
+                }
+            }
+        })
     }
 
     private fun initPlayerViews(exoPlayer: ExoPlayer?) {
@@ -106,10 +121,13 @@ class MiniPlayerFragment : Fragment() {
             exoPlayer?.playbackState
         }
 
-        durationSongLengthView?.text =
-            "-${(exoPlayer!!.duration - exoPlayer!!.currentPosition).parseIntToLength()}"
-
         if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) {
+
+            if (playbackState == Player.STATE_READY) {
+                durationSongLengthView?.text =
+                    "-${(exoPlayer!!.duration - exoPlayer!!.currentPosition).parseIntToLength()}"
+            }
+
             var delayMs = 1000 - (exoPlayer!!.currentPosition % 1000)
             if (delayMs < 200) {
                 delayMs += 1000
