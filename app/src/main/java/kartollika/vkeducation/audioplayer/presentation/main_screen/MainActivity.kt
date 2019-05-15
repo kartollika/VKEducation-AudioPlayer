@@ -26,10 +26,16 @@ import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView {
 
+    companion object {
+        private const val PERMISSION_GRANT_VIA_SETTINGS_REQUEST_CODE = 100
+        private const val PERMISSION_REQUEST_CODE = 101
+    }
+
     private lateinit var presenter: MainActivityPresenter
     private var playerService: PlayerService? = null
     private var isPlayerBounded = false
     private var binder: Binder? = null
+
 
     private var serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -71,7 +77,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     override fun onDestroy() {
         super.onDestroy()
-        unbind()
+        unbindPlayerService()
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
@@ -82,7 +88,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
-            9999 -> {
+            FolderChooserActivity.FOLDER_CHOOSE_REQUEST_CODE -> {
                 super.onActivityResult(requestCode, resultCode, data)
 
                 if (resultCode == Activity.RESULT_OK) {
@@ -91,7 +97,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                     playerService?.reloadPlayTracksFromOutsize(folder)
                 }
             }
-            101 -> {
+            PERMISSION_GRANT_VIA_SETTINGS_REQUEST_CODE -> {
                 checkStoragePermission()
             }
         }
@@ -107,7 +113,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     override fun openFolderSelectView() {
         val intent = Intent(this, FolderChooserActivity::class.java)
-        startActivityForResult(intent, 9999)
+        startActivityForResult(intent, FolderChooserActivity.FOLDER_CHOOSE_REQUEST_CODE)
     }
 
     private fun bindPlayerService() {
@@ -115,7 +121,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         isPlayerBounded = true
     }
 
-    private fun unbind() {
+    private fun unbindPlayerService() {
         if (isPlayerBounded) {
             unbindService(serviceConnection)
             isPlayerBounded = false
@@ -137,13 +143,17 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                     .setPositiveButton("Ok") { _, _ ->
                         run {
                             ActivityCompat.requestPermissions(
-                                this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 100
+                                this,
+                                arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                                PERMISSION_REQUEST_CODE
                             )
                         }
                     }.create().show()
             } else {
                 ActivityCompat.requestPermissions(
-                    this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 100
+                    this,
+                    arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),
+                    PERMISSION_REQUEST_CODE
                 )
             }
         }
@@ -151,7 +161,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == 100 && grantResults.size == 1) {
+        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.size == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 presenter.onOpenFolderStoragePermissionGranted()
                 bindPlayerService()
@@ -178,8 +188,9 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     private fun createStoragePermissionDialog(): AlertDialog {
         return AlertDialog.Builder(this).setTitle("Разрешение")
             .setMessage("Для выбора разделя для проигрывания аудио необходимо вручную предоставить разрешение приложению")
-            .setPositiveButton("Настройки") { _, _ -> openApplicationSettings(101) }
-            .setNegativeButton("Отмена") { dialog, _ -> dialog.dismiss() }.create()
+            .setPositiveButton("Настройки") { _, _ ->
+                openApplicationSettings(PERMISSION_GRANT_VIA_SETTINGS_REQUEST_CODE)
+            }.setNegativeButton("Отмена") { dialog, _ -> dialog.dismiss() }.create()
     }
 
     private fun openApplicationSettings(requestCode: Int) {
@@ -188,5 +199,4 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         )
         startActivityForResult(appSettingsIntent, requestCode)
     }
-
 }

@@ -1,84 +1,37 @@
 package kartollika.vkeducation.audioplayer.presentation.player.mini
 
-import android.annotation.SuppressLint
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
 import android.support.v4.app.Fragment
-import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.PlaybackStateCompat
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.Player
 import kartollika.vkeducation.audioplayer.R
-import kartollika.vkeducation.audioplayer.common.utils.parseIntToLength
 import kartollika.vkeducation.audioplayer.common.utils.setImageResource
-import kartollika.vkeducation.audioplayer.player.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kotlinx.android.synthetic.main.view_mini_player.*
 
-class MiniPlayerFragment : Fragment() {
+class MiniPlayerFragment : Fragment(), MiniPlayerContract.MiniPlayerView {
 
     companion object {
         fun newInstance() = MiniPlayerFragment()
     }
 
     private var isPlayerBounded = false
-    private var mediaController: MediaControllerCompat? = null
-    private var exoPlayer: ExoPlayer? = null
-    private val handler: Handler = Handler()
-
-    private val updateSongLeftRunnable = Runnable { updateSongLeft() }
-    private lateinit var playerService: PlayerService
-
-    private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
-
-        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            super.onPlaybackStateChanged(state)
-            updateSongLeft()
-            changeControlsState(playerService.getActiveTracks().isNotEmpty())
-
-            when (state?.state) {
-                PlaybackStateCompat.STATE_PLAYING -> {
-                    playPauseActionView.setImageResource(R.drawable.ic_pause_28)
-                }
-                PlaybackStateCompat.STATE_PAUSED, PlaybackStateCompat.STATE_STOPPED -> {
-                    playPauseActionView.setImageResource(R.drawable.ic_play_28)
-                }
-            }
-        }
-
-        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-            super.onMetadataChanged(metadata)
-            if (metadata == null) {
-                songNameTextView.text = ""
-                albumPreviewImageView.setImageDrawable(null)
-            } else {
-                songNameTextView.text = metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
-                albumPreviewImageView.setImageResource(
-                    metadata.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI)
-                        ?: R.drawable.images
-                )
-            }
-        }
-    }
+    private lateinit var presenter: MiniPlayerPresenter
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            playerService = (binder as PlayerService.AudioPlayerBinder).getService()
-            initPlayerViews(playerService.getExoPlayer())
-            mediaController = MediaControllerCompat(context, binder.getMediaSessionToken())
-            mediaController?.registerCallback(mediaControllerCallback)
-            initMediaListeners()
-
-            initializeInitialState(mediaController!!)
+            val playerService = (binder as PlayerService.AudioPlayerBinder).getService()
+            val mediaController = MediaControllerCompat(context, binder.getMediaSessionToken())
+            presenter.setPlayerService(playerService)
+            presenter.setExoPlayer(playerService.getExoPlayer()!!)
+            presenter.setMediaController(mediaController)
             isPlayerBounded = true
         }
 
@@ -87,57 +40,13 @@ class MiniPlayerFragment : Fragment() {
         }
     }
 
-    private fun initMediaListeners() {
-        playerService.addOnTracksChangedListener(object : PlayerService.OnTracksChangesListener {
-            override fun onTracksChanged(tracks: List<AudioTrack>) {
-                if (tracks.isEmpty()) {
-                    mediaControllerCallback.onMetadataChanged(null)
-                }
-            }
-        })
-    }
+    /* ========================
+        Lifecycle methods
+     */
 
-    private fun initPlayerViews(exoPlayer: ExoPlayer?) {
-        this.exoPlayer = exoPlayer
-    }
-
-    private fun initializeInitialState(mediaController: MediaControllerCompat) {
-        mediaControllerCallback.onPlaybackStateChanged(mediaController.playbackState)
-        mediaControllerCallback.onMetadataChanged(mediaController.metadata)
-        changeControlsState(playerService.getActiveTracks().isNotEmpty())
-    }
-
-    fun changeControlsState(isPlaylistEmpty: Boolean) {
-        nextTrackActionView.isEnabled = isPlaylistEmpty
-        playPauseActionView.isEnabled = isPlaylistEmpty
-    }
-
-    @SuppressLint("SetTextI18n")
-    private fun updateSongLeft() {
-        handler.removeCallbacks(updateSongLeftRunnable)
-        val playbackState = if (exoPlayer == null) {
-            Player.STATE_IDLE
-        } else {
-            exoPlayer?.playbackState
-        }
-
-        if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) {
-
-            if (playbackState == Player.STATE_READY) {
-                durationSongLengthView?.text =
-                    "-${(exoPlayer!!.duration - exoPlayer!!.currentPosition).parseIntToLength()}"
-            }
-
-            var delayMs = 1000 - (exoPlayer!!.currentPosition % 1000)
-            if (delayMs < 200) {
-                delayMs += 1000
-            } else {
-                delayMs = 1000
-            }
-            handler.postDelayed(
-                updateSongLeftRunnable, delayMs
-            )
-        }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        presenter = MiniPlayerPresenter(this)
     }
 
     override fun onCreateView(
@@ -147,15 +56,8 @@ class MiniPlayerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        playPauseActionView.setOnClickListener {
-            if (mediaController?.playbackState?.state == PlaybackStateCompat.STATE_PLAYING) {
-                mediaController?.transportControls?.pause()
-            } else {
-                mediaController?.transportControls?.play()
-            }
-        }
+        initActionsListeners()
         songNameTextView.isSelected = true
-        nextTrackActionView.setOnClickListener { mediaController?.transportControls?.skipToNext() }
     }
 
     override fun onAttach(context: Context?) {
@@ -165,12 +67,65 @@ class MiniPlayerFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
-        unbindService()
-        mediaController?.unregisterCallback(mediaControllerCallback)
-        mediaController = null
+        unbindPlayerService()
+        presenter.unregisterMediaController()
     }
 
-    private fun unbindService() {
+    /* ========================
+        Mvp methods
+     */
+
+    override fun showSongTitle(songTitle: String) {
+        songNameTextView.text = songTitle
+    }
+
+    override fun setPreviewAlbum(resource: Any?) {
+        if (resource == null) {
+            albumPreviewImageView.setImageDrawable(null)
+            return
+        }
+        albumPreviewImageView.setImageResource(resource)
+    }
+
+    override fun switchToPlayAction() {
+        playPauseActionView.apply {
+            setImageResource(R.drawable.ic_play_28)
+            setOnClickListener { presenter.onPlayAction() }
+        }
+    }
+
+    override fun switchToPauseAction() {
+        playPauseActionView.apply {
+            setImageResource(R.drawable.ic_pause_28)
+            setOnClickListener { presenter.onPauseAction() }
+        }
+    }
+
+    override fun hideMiniPlayer() {
+    }
+
+    override fun showMiniPlayer() {
+    }
+
+    override fun updateDurationLeft(durationLeft: String) {
+        durationSongLengthView?.text = durationLeft
+    }
+
+    override fun changeControlsState(enabled: Boolean) {
+        nextTrackActionView.isEnabled = enabled
+        playPauseActionView.isEnabled = enabled
+    }
+
+    /* ========================
+        Private methods
+     */
+
+    private fun initActionsListeners() {
+        playPauseActionView.setOnClickListener { presenter.onPlayAction() }
+        nextTrackActionView.setOnClickListener { presenter.onNextAction() }
+    }
+
+    private fun unbindPlayerService() {
         activity?.unbindService(serviceConnection)
         isPlayerBounded = false
     }

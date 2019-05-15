@@ -11,6 +11,7 @@ import android.widget.FrameLayout
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.common.utils.dpToPx
 import kartollika.vkeducation.audioplayer.common.utils.onRenderFinished
+import kartollika.vkeducation.audioplayer.presentation.player.full.PlayerFragment
 import kartollika.vkeducation.audioplayer.presentation.player.mini.MiniPlayerFragment
 import kotlinx.android.synthetic.main.view_bottom_sheet_audio_player.view.*
 
