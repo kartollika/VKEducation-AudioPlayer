@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.Handler
 import android.os.IBinder
 import android.support.v4.app.Fragment
 import android.support.v4.media.session.MediaControllerCompat
@@ -24,7 +23,6 @@ class MiniPlayerFragment : Fragment(), MiniPlayerContract.MiniPlayerView {
     }
 
     private var isPlayerBounded = false
-    private val handler: Handler = Handler()
     private lateinit var presenter: MiniPlayerPresenter
 
     private val serviceConnection = object : ServiceConnection {
