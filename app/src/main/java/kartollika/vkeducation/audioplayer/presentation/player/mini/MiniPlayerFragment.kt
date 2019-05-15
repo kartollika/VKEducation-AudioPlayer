@@ -42,12 +42,6 @@ class MiniPlayerFragment : Fragment(), MiniPlayerContract.MiniPlayerView {
         }
     }
 
-//    private fun initializeInitialState(mediaController: MediaControllerCompat) {
-//        mediaControllerCallback.onPlaybackStateChanged(mediaController.playbackState)
-//        mediaControllerCallback.onMetadataChanged(mediaController.metadata)
-//        changeControlsState(playerService.getActiveTracks().isNotEmpty())
-//    }
-
     /* ========================
         Lifecycle methods
      */
