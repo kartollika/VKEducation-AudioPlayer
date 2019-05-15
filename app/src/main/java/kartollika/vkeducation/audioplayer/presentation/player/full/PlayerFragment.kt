@@ -15,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.exoplayer2.ExoPlayer
 import kartollika.vkeducation.audioplayer.R
+import kartollika.vkeducation.audioplayer.common.views.AlphaAndZoomCentralLayoutManager
 import kartollika.vkeducation.audioplayer.common.views.SnapOnScrollListener
 import kartollika.vkeducation.audioplayer.common.views.attachSnapHelperWithListener
 import kartollika.vkeducation.audioplayer.player.AudioTrack
@@ -146,7 +147,10 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
 
     private fun initTracksRecyclerView() {
         tracksAdapter = AudioTracksAdapter()
-        tracksRecyclerView.setupAdapter(tracksAdapter)
+        tracksRecyclerView.setupCarouselRecyclerView(
+            tracksAdapter, AlphaAndZoomCentralLayoutManager(context)
+        )
+
         tracksRecyclerView.attachSnapHelperWithListener(LinearSnapHelper().apply {
             attachToRecyclerView(tracksRecyclerView)
         },
