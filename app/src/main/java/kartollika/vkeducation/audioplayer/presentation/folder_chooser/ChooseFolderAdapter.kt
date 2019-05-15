@@ -11,12 +11,14 @@ import kotlinx.android.synthetic.main.folder_item.view.*
 class ChooseFolderAdapter(private var folders: List<String>) :
     RecyclerView.Adapter<ChooseFolderAdapter.ChooseItemViewHolder>() {
 
+    companion object {
+        private const val TYPE_FOLDER = 0
+        private const val TYPE_BACK = 1
+    }
+
     init {
         folders = folders.toMutableList().apply { add(0, "/..") }
     }
-
-    private val TYPE_FOLDER = 0
-    private val TYPE_BACK = 1
 
     interface ChooseFolderListener {
         fun onFolderChosen(folder: String)

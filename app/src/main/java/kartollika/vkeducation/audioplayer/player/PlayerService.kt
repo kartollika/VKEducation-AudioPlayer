@@ -44,7 +44,6 @@ class PlayerService : Service() {
     private var binder: Binder = AudioPlayerBinder()
     private var exoPlayer: SimpleExoPlayer? = null
     private var mediaSource: ConcatenatingMediaSource = ConcatenatingMediaSource()
-    private var onTracksChangesListener: OnTracksChangesListener? = null
     private var mediaSessionManager: MediaSessionCompat? = null
     private lateinit var mediaSession: MediaSessionCompat
     private val playerRepository = PlayerRepository()
@@ -406,6 +405,7 @@ class PlayerService : Service() {
 
     fun addOnTracksChangedListener(tracksChangesListener: OnTracksChangesListener) {
         tracksChangesListeners.add(tracksChangesListener)
+        tracksChangesListener.onTracksChanged(getActiveTracks())
     }
 
     private var validActiveTracks: List<AudioTrack> = mutableListOf()

@@ -15,6 +15,10 @@ import kotlin.properties.Delegates
 
 class FolderChooserActivity : AppCompatActivity() {
 
+    companion object {
+        const val FOLDER_CHOOSE_REQUEST_CODE = 102
+    }
+
     private lateinit var foldersAdapter: ChooseFolderAdapter
     private val roots: MutableList<String> = mutableListOf()
     private var previousBackstack: ArrayDeque<String> = ArrayDeque()
