@@ -52,6 +52,7 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
     override fun setMediaController(mediaController: MediaControllerCompat) {
         super.setMediaController(mediaController)
         mediaController.registerCallback(mediaControllerCallback)
+        setInitialPlayerState()
     }
 
     override fun setPlayerService(playerService: PlayerService) {
@@ -93,18 +94,22 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
 
             if (playbackState == Player.STATE_READY) {
                 view.updateDurationLeft("-${(exoPlayer.duration - exoPlayer.currentPosition).parseIntToLength()}")
-
             }
 
             var delayMs = 1000 - (exoPlayer.currentPosition % 1000)
             if (delayMs < 200) {
-                delayMs += 800
+                delayMs += 1000
             } else {
-                delayMs = 800
+                delayMs = 1000
             }
             handler.postDelayed(
                 updateSongLeftRunnable, delayMs
             )
         }
+    }
+
+    private fun setInitialPlayerState() {
+        mediaControllerCallback.onPlaybackStateChanged(mediaController.playbackState)
+        mediaControllerCallback.onMetadataChanged(mediaController.metadata)
     }
 }

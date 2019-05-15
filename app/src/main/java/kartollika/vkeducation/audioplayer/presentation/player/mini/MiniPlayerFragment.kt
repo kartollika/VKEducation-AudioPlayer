@@ -116,7 +116,7 @@ class MiniPlayerFragment : Fragment(), MiniPlayerContract.MiniPlayerView {
     }
 
     override fun updateDurationLeft(durationLeft: String) {
-        durationSongLengthView.text = durationLeft
+        durationSongLengthView?.text = durationLeft
     }
 
     override fun changeControlsState(enabled: Boolean) {
