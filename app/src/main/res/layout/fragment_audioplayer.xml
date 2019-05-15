@@ -32,6 +32,7 @@
             android:paddingRight="26dp">
 
             <ImageButton
+                android:id="@+id/addActionView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/actionBarItemBackground"
@@ -96,6 +97,7 @@
             </LinearLayout>
 
             <ImageButton
+                android:id="@+id/moreActionsActionView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="?attr/actionBarItemBackground"

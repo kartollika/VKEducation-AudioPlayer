@@ -406,6 +406,7 @@ class PlayerService : Service() {
 
     fun addOnTracksChangedListener(tracksChangesListener: OnTracksChangesListener) {
         tracksChangesListeners.add(tracksChangesListener)
+        tracksChangesListener.onTracksChanged(getActiveTracks())
     }
 
     private var validActiveTracks: List<AudioTrack> = mutableListOf()
