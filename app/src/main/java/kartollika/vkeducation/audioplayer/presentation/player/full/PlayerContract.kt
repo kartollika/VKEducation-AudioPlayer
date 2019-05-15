@@ -1,17 +1,15 @@
 package kartollika.vkeducation.audioplayer.presentation.player.full
 
-import android.support.v4.media.session.MediaControllerCompat
 import com.google.android.exoplayer2.ExoPlayer
 import kartollika.vkeducation.audioplayer.common.mvp.MvpView
 import kartollika.vkeducation.audioplayer.player.AudioTrack
-import kartollika.vkeducation.audioplayer.player.PlayerService
 
 interface PlayerContract {
     interface PlayerView : MvpView {
         fun scrollCarouselToPosition(position: Int)
         fun showSongTitle(songTitle: String)
         fun connectExoPlayerWithControllers(exoPlayer: ExoPlayer)
-        fun showArtist(artistName: String)
+        fun showArtistName(artistName: String)
         fun setPreviewAlbum(resource: Any)
         fun switchToPlayAction()
         fun switchToPauseAction()
@@ -21,9 +19,6 @@ interface PlayerContract {
     }
 
     interface PlayerPresenter {
-        fun initializeMediaController(mediaController: MediaControllerCompat)
-        fun setPlayerService(playerService: PlayerService)
-        fun setExoPlayer(exoPlayer: ExoPlayer)
         fun onShuffleAction()
         fun onAddAction()
         fun onRepeatAction()

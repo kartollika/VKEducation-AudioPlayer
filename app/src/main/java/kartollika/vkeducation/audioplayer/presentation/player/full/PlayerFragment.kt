@@ -29,18 +29,17 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
     }
 
     private lateinit var tracksAdapter: AudioTracksAdapter
-    private lateinit var playerService: PlayerService
     private var isPlayerBounded = false
-
     private lateinit var presenter: PlayerPresenter
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
-            playerService = (binder as PlayerService.AudioPlayerBinder).getService()
+            val playerService = (binder as PlayerService.AudioPlayerBinder).getService()
             val mediaController = MediaControllerCompat(context, binder.getMediaSessionToken())
-            presenter.initializeMediaController(mediaController)
+            presenter.setMediaController(mediaController)
             presenter.setExoPlayer(playerService.getExoPlayer()!!)
             presenter.setPlayerService(playerService)
+
             isPlayerBounded = true
         }
 
@@ -49,6 +48,10 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
             presenter.unregisterMediaController()
         }
     }
+
+    /* ========================
+        Lifecycle methods
+     */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,49 +83,8 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
         presenter.unregisterMediaController()
     }
 
-    private fun initTracksRecyclerView() {
-        tracksAdapter = AudioTracksAdapter()
-        tracksRecyclerView.setupAdapter(tracksAdapter)
-        tracksRecyclerView.attachSnapHelperWithListener(LinearSnapHelper().apply {
-            attachToRecyclerView(tracksRecyclerView)
-        },
-            SnapOnScrollListener.Behavior.NOTIFY_ON_SCROLL_IDLE,
-            object : SnapOnScrollListener.OnSnapPositionChangeListener {
-                override fun onSnapPositionChange(position: Int) {
-                    presenter.onSkipToQueueItem(position)
-                }
-            })
-    }
-
-    private fun initListeners() {
-        previousTrackActionView.setOnClickListener { presenter.onPreviousAction() }
-        nextTrackActionView.setOnClickListener { presenter.onNextAction() }
-        pausePlayActionView.setOnClickListener { presenter.onPlayAction() }
-        shuffleActionView.setOnClickListener { presenter.onShuffleAction() }
-        repeatActionView.setOnClickListener { presenter.onRepeatAction() }
-        moreActionsActionView.setOnClickListener { presenter.onMoreOptionsAction() }
-        addActionView.setOnClickListener { presenter.onAddAction() }
-    }
-
-    override fun changeControlsState(enabled: Boolean) {
-        previousTrackActionView.isEnabled = enabled
-        nextTrackActionView.isEnabled = enabled
-        pausePlayActionView.isEnabled = enabled
-    }
-
-    private fun unbindService() {
-        activity?.unbindService(serviceConnection)
-        isPlayerBounded = false
-    }
-
-    private fun bindPlayerService() {
-        val playerServiceIntent = getPlayerServiceIntent()
-        activity?.bindService(playerServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
-        isPlayerBounded = true
-    }
-
     /* ========================
-        View methods
+        Mvp methods
      */
 
     override fun scrollCarouselToPosition(position: Int) {
@@ -139,7 +101,7 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
         songNameTextView.text = songTitle
     }
 
-    override fun showArtist(artistName: String) {
+    override fun showArtistName(artistName: String) {
         artistNameTextView.text = artistName
     }
 
@@ -168,8 +130,53 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
     }
 
     override fun showDummyArtistAndSong() {
-        showArtist(getDefaultNoArtistCaption())
+        showArtistName(getDefaultNoArtistCaption())
         showSongTitle(getDefaultNoSongNameCaption())
+    }
+
+    override fun changeControlsState(enabled: Boolean) {
+        previousTrackActionView.isEnabled = enabled
+        nextTrackActionView.isEnabled = enabled
+        pausePlayActionView.isEnabled = enabled
+    }
+
+    /* ========================
+        Private methods
+     */
+
+    private fun initTracksRecyclerView() {
+        tracksAdapter = AudioTracksAdapter()
+        tracksRecyclerView.setupAdapter(tracksAdapter)
+        tracksRecyclerView.attachSnapHelperWithListener(LinearSnapHelper().apply {
+            attachToRecyclerView(tracksRecyclerView)
+        },
+            SnapOnScrollListener.Behavior.NOTIFY_ON_SCROLL_IDLE,
+            object : SnapOnScrollListener.OnSnapPositionChangeListener {
+                override fun onSnapPositionChange(position: Int) {
+                    presenter.onSkipToQueueItem(position)
+                }
+            })
+    }
+
+    private fun initListeners() {
+        previousTrackActionView.setOnClickListener { presenter.onPreviousAction() }
+        nextTrackActionView.setOnClickListener { presenter.onNextAction() }
+        pausePlayActionView.setOnClickListener { presenter.onPlayAction() }
+        shuffleActionView.setOnClickListener { presenter.onShuffleAction() }
+        repeatActionView.setOnClickListener { presenter.onRepeatAction() }
+        moreActionsActionView.setOnClickListener { presenter.onMoreOptionsAction() }
+        addActionView.setOnClickListener { presenter.onAddAction() }
+    }
+
+    private fun unbindService() {
+        activity?.unbindService(serviceConnection)
+        isPlayerBounded = false
+    }
+
+    private fun bindPlayerService() {
+        val playerServiceIntent = getPlayerServiceIntent()
+        activity?.bindService(playerServiceIntent, serviceConnection, Context.BIND_AUTO_CREATE)
+        isPlayerBounded = true
     }
 
     private fun getPlayerServiceIntent() = Intent(activity, PlayerService::class.java)

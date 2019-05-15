@@ -4,16 +4,12 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.google.android.exoplayer2.ExoPlayer
-import kartollika.vkeducation.audioplayer.common.mvp.BasePresenter
 import kartollika.vkeducation.audioplayer.player.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
+import kartollika.vkeducation.audioplayer.presentation.player.PlayerBasePresenter
 
 class PlayerPresenter(view: PlayerContract.PlayerView) :
-    BasePresenter<PlayerContract.PlayerView>(view), PlayerContract.PlayerPresenter {
-
-    private lateinit var mediaController: MediaControllerCompat
-    private lateinit var exoPlayer: ExoPlayer
-    private lateinit var playerService: PlayerService
+    PlayerBasePresenter<PlayerContract.PlayerView>(view), PlayerContract.PlayerPresenter {
 
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
@@ -41,17 +37,17 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
             view.showSongTitle(metadata?.getString(MediaMetadataCompat.METADATA_KEY_TITLE) ?: "")
-            view.showArtist(metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "")
+            view.showArtistName(metadata?.getString(MediaMetadataCompat.METADATA_KEY_ARTIST) ?: "")
         }
     }
 
-    override fun initializeMediaController(mediaController: MediaControllerCompat) {
-        this.mediaController = mediaController
+    override fun setMediaController(mediaController: MediaControllerCompat) {
+        super.setMediaController(mediaController)
         mediaController.registerCallback(mediaControllerCallback)
     }
 
     override fun setPlayerService(playerService: PlayerService) {
-        this.playerService = playerService
+        super.setPlayerService(playerService)
         playerService.addOnTracksChangedListener(object : PlayerService.OnTracksChangesListener {
             override fun onTracksChanged(tracks: List<AudioTrack>) {
                 view.fillActiveTracks(tracks)
@@ -65,7 +61,8 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
     }
 
     override fun setExoPlayer(exoPlayer: ExoPlayer) {
-        this.exoPlayer = exoPlayer
+        super.setExoPlayer(exoPlayer)
+        view.connectExoPlayerWithControllers(exoPlayer)
         setInitialPlayerState()
     }
 
