@@ -9,7 +9,10 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        startPlayerService()
+    }
 
+    private fun startPlayerService() {
         val playerServiceIntent = Intent(this, PlayerService::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(playerServiceIntent)
