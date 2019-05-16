@@ -6,94 +6,6 @@
     android:layout_height="match_parent">
 
     <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:paddingLeft="26dp"
-        android:paddingRight="26dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageButton
-            android:id="@+id/addActionView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/actionBarItemBackground"
-            android:src="@drawable/ic_add_outline_24" />
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_gravity="center_horizontal"
-                android:gravity="center">
-
-                <TextView
-                    android:id="@+id/artistNameTextView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginRight="@dimen/default_half_horizontal_margin"
-                    android:ellipsize="marquee"
-                    android:focusable="true"
-                    android:focusableInTouchMode="true"
-                    android:fontFamily="@font/roboto_medium"
-                    android:marqueeRepeatLimit="marquee_forever"
-                    android:scrollHorizontally="true"
-                    android:singleLine="true"
-                    android:textAlignment="center"
-                    android:textSize="24sp" />
-
-                <ImageView
-                    android:id="@+id/explicitSongLogoView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/artistNameTextView"
-                    android:layout_toRightOf="@id/artistNameTextView"
-                    android:baselineAlignBottom="true"
-                    android:src="@drawable/ic_explicit" />
-
-            </RelativeLayout>
-
-            <TextView
-                android:id="@+id/songNameTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:ellipsize="marquee"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:fontFamily="@font/roboto"
-                android:marqueeRepeatLimit="marquee_forever"
-                android:scrollHorizontally="true"
-                android:singleLine="true"
-                android:textAlignment="center"
-                android:textColor="#528bcc"
-                android:textSize="16sp" />
-
-        </LinearLayout>
-
-        <ImageButton
-            android:id="@+id/moreActionsActionView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/actionBarItemBackground"
-            android:src="@drawable/ic_more_24dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
         android:id="@+id/root"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -116,18 +28,105 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingLeft="26dp"
+        android:paddingRight="26dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/guideline"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageButton
+            android:id="@+id/addActionView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/actionBarItemBackground"
+            android:src="@drawable/ic_add_outline_24" />
+
+        <ImageButton
+            android:id="@+id/moreActionsActionView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?attr/actionBarItemBackground"
+            android:src="@drawable/ic_more_24dp" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/explicitSongLogoView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/artistNameTextView"
+                    android:layout_toRightOf="@id/artistNameTextView"
+                    android:baselineAlignBottom="true"
+                    android:src="@drawable/ic_explicit" />
+
+                <TextView
+                    android:id="@+id/artistNameTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="@dimen/default_half_horizontal_margin"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:fontFamily="@font/roboto_medium"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:textAlignment="center"
+                    android:textSize="24sp" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/songNameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:fontFamily="@font/roboto"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:textAlignment="center"
+                android:textColor="#528bcc"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
     <com.google.android.exoplayer2.ui.PlayerControlView
 
         android:id="@+id/exo_controllers"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="@dimen/default_vertical_margin"
-        android:layout_marginEnd="8dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
         app:controller_layout_id="@layout/player_controls"
+        app:layout_constraintDimensionRatio="h,1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/root"
+        app:layout_constraintTop_toBottomOf="@id/linearLayout"
         app:show_timeout="0"
         tools:visibility="gone" />
 
@@ -144,8 +143,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/pausePlayActionView"
         app:layout_constraintEnd_toStartOf="@+id/pausePlayActionView"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toTopOf="@+id/pausePlayActionView"
-        tools:visibility="visible" />
+        app:layout_constraintTop_toTopOf="@+id/pausePlayActionView" />
 
     <ImageButton
         android:id="@+id/pausePlayActionView"
@@ -160,7 +158,7 @@
         app:layout_constraintBottom_toTopOf="@+id/repeatActionView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintTop_toBottomOf="@id/exo_controllers"
         tools:visibility="visible" />
 
     <ImageView

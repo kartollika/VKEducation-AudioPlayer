@@ -11,6 +11,8 @@ import kartollika.vkeducation.audioplayer.presentation.player.PlayerBasePresente
 class PlayerPresenter(view: PlayerContract.PlayerView) :
     PlayerBasePresenter<PlayerContract.PlayerView>(view), PlayerContract.PlayerPresenter {
 
+    private lateinit var onTracksChangesListener: PlayerService.OnTracksChangesListener
+
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
@@ -48,7 +50,7 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
 
     override fun setPlayerService(playerService: PlayerService) {
         super.setPlayerService(playerService)
-        playerService.addOnTracksChangedListener(object : PlayerService.OnTracksChangesListener {
+        onTracksChangesListener = object : PlayerService.OnTracksChangesListener {
             override fun onTracksChanged(tracks: List<AudioTrack>) {
                 view.fillActiveTracks(tracks)
                 view.changeControlsState(tracks.isNotEmpty())
@@ -56,7 +58,8 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
                     view.showDummyArtistAndSong()
                 }
             }
-        })
+        }
+        playerService.addOnTracksChangedListener(onTracksChangesListener)
         view.changeControlsState(playerService.getActiveTracks().isNotEmpty())
     }
 
@@ -100,6 +103,10 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
 
     override fun unregisterMediaController() {
         mediaController?.unregisterCallback(mediaControllerCallback)
+    }
+
+    override fun onDestroy() {
+        playerService?.removeOnTracksChangedListener(onTracksChangesListener)
     }
 
     private fun setInitialPlayerState() {

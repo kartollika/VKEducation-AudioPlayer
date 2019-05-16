@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.Fragment
@@ -22,6 +23,7 @@ import kartollika.vkeducation.audioplayer.player.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.presentation.player.tracks_list.AudioTracksAdapter
 import kotlinx.android.synthetic.main.fragment_audioplayer.*
+
 
 class PlayerFragment : Fragment(), PlayerContract.PlayerView {
 
@@ -80,6 +82,7 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
 
     override fun onDestroy() {
         super.onDestroy()
+        presenter.onDestroy()
         unbindService()
         presenter.unregisterMediaController()
     }
@@ -147,8 +150,16 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
 
     private fun initTracksRecyclerView() {
         tracksAdapter = AudioTracksAdapter()
+        val layoutManager = AlphaAndZoomCentralLayoutManager(context).apply {
+            val orientation = resources.configuration.orientation
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                lowerBoundAlpha = 0f
+                scaleToMiniCoefficient = 0.6f
+            }
+        }
+
         tracksRecyclerView.setupCarouselRecyclerView(
-            tracksAdapter, AlphaAndZoomCentralLayoutManager(context)
+            tracksAdapter, layoutManager
         )
 
         tracksRecyclerView.attachSnapHelperWithListener(LinearSnapHelper().apply {

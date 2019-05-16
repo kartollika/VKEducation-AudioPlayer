@@ -10,7 +10,7 @@ class AlphaAndZoomCentralLayoutManager(
     context: Context?, orientation: Int, reverseLayout: Boolean) :
     LinearLayoutManager(context, orientation, reverseLayout) {
 
-    constructor(context: Context?) : this(context, LinearLayoutManager.HORIZONTAL, false)
+    constructor(context: Context?) : this(context, HORIZONTAL, false)
 
     var lowerBoundAlpha: Float = 0.5f
     var upperBoundAplha = 1f

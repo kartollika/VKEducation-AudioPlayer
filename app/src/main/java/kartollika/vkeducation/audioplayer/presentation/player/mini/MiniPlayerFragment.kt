@@ -67,6 +67,7 @@ class MiniPlayerFragment : Fragment(), MiniPlayerContract.MiniPlayerView {
 
     override fun onDestroy() {
         super.onDestroy()
+        presenter.onDestroy()
         unbindPlayerService()
         presenter.unregisterMediaController()
     }

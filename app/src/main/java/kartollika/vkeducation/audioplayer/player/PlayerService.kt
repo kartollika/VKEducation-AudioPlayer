@@ -408,6 +408,10 @@ class PlayerService : Service() {
         tracksChangesListener.onTracksChanged(getActiveTracks())
     }
 
+    fun removeOnTracksChangedListener(listener: OnTracksChangesListener) {
+        tracksChangesListeners.remove(listener)
+    }
+
     private var validActiveTracks: List<AudioTrack> = mutableListOf()
 
     fun getActiveTracks(): List<AudioTrack> = validActiveTracks

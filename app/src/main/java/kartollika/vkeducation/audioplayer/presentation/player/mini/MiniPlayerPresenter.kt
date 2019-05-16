@@ -18,6 +18,7 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
 
     private val handler = Handler()
     private val updateSongLeftRunnable = Runnable { updateSongLeft() }
+    private lateinit var onTracksChangesListener: PlayerService.OnTracksChangesListener
 
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
@@ -57,7 +58,7 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
 
     override fun setPlayerService(playerService: PlayerService) {
         super.setPlayerService(playerService)
-        playerService.addOnTracksChangedListener(object : PlayerService.OnTracksChangesListener {
+        onTracksChangesListener = object : PlayerService.OnTracksChangesListener {
             override fun onTracksChanged(tracks: List<AudioTrack>) {
                 view.changeControlsState(tracks.isNotEmpty())
                 if (tracks.isEmpty()) {
@@ -65,7 +66,8 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
                     mediaControllerCallback.onMetadataChanged(null)
                 }
             }
-        })
+        }
+        playerService.addOnTracksChangedListener(onTracksChangesListener)
         view.changeControlsState(playerService.getActiveTracks().isNotEmpty())
     }
 
@@ -111,6 +113,10 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
                 updateSongLeftRunnable, delayMs
             )
         }
+    }
+
+    override fun onDestroy() {
+        playerService?.removeOnTracksChangedListener(onTracksChangesListener)
     }
 
     private fun setInitialPlayerState() {
