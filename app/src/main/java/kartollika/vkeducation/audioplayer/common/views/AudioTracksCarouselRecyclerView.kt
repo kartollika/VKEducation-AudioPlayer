@@ -1,7 +1,6 @@
 package kartollika.vkeducation.audioplayer.common.views
 
 import android.content.Context
-import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.AttributeSet
 
@@ -11,9 +10,9 @@ class AudioTracksCarouselRecyclerView(context: Context, attrs: AttributeSet?, de
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
     constructor(context: Context) : this(context, null)
 
-    fun <T : ViewHolder> setupAdapter(adapter: Adapter<T>) {
-        layoutManager =
-            AlphaAndZoomCentralLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+    fun <T : ViewHolder> setupCarouselRecyclerView(
+        adapter: Adapter<T>, layoutManager: LayoutManager) {
+        this.layoutManager = layoutManager
 
         adapter.registerAdapterDataObserver(object : AdapterDataObserver() {
             override fun onChanged() {

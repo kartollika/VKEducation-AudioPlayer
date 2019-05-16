@@ -6,26 +6,17 @@ import android.view.ViewGroup
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.player.AudioTrack
 
-class AudioTracksAdapter(audioTracks: List<AudioTrack> = mutableListOf()) :
+class AudioTracksAdapter(var audioTracks: List<AudioTrack> = mutableListOf()) :
     RecyclerView.Adapter<AudioTrackViewHolder>() {
 
-    private val dummyView = 1
+    companion object {
+        private const val DUMMY_VIEW = 1
+        private const val DEFAULT_TRACK_VIEW = 0
+    }
+
     private val dummyAudioTrack = AudioTrack(
         albumArt = R.drawable.ic_baseline_music_off_24px
     )
-    private val defaultTrackView = 0
-
-    interface OnSetTracksListener {
-        fun onSet(isEmpty: Boolean)
-    }
-
-    var onSetAudioTracksListener: OnSetTracksListener? = null
-
-    var audioTracks: List<AudioTrack> = audioTracks
-        set(value) {
-            onSetAudioTracksListener?.onSet(value.isEmpty())
-            field = value
-        }
 
     override fun onCreateViewHolder(container: ViewGroup, p1: Int): AudioTrackViewHolder {
         val view = LayoutInflater.from(container.context).inflate(
@@ -37,7 +28,7 @@ class AudioTracksAdapter(audioTracks: List<AudioTrack> = mutableListOf()) :
     override fun getItemCount(): Int = Math.max(audioTracks.size, 1)
 
     override fun onBindViewHolder(p0: AudioTrackViewHolder, position: Int) {
-        if (getItemViewType(position) == dummyView) {
+        if (getItemViewType(position) == DUMMY_VIEW) {
             p0.bind(dummyAudioTrack)
         } else {
             p0.bind(audioTracks[position])
@@ -46,8 +37,8 @@ class AudioTracksAdapter(audioTracks: List<AudioTrack> = mutableListOf()) :
 
     override fun getItemViewType(position: Int): Int {
         if (audioTracks.isEmpty()) {
-            return dummyView
+            return DUMMY_VIEW
         }
-        return defaultTrackView
+        return DEFAULT_TRACK_VIEW
     }
 }
