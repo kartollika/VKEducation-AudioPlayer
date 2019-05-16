@@ -79,32 +79,32 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
     }
 
     override fun onPauseAction() {
-        mediaController.transportControls.pause()
+        mediaController?.transportControls?.pause()
     }
 
     override fun onPlayAction() {
-        mediaController.transportControls.play()
+        mediaController?.transportControls?.play()
     }
 
     override fun onPreviousAction() {
-        mediaController.transportControls.skipToPrevious()
+        mediaController?.transportControls?.skipToPrevious()
     }
 
     override fun onNextAction() {
-        mediaController.transportControls.skipToNext()
+        mediaController?.transportControls?.skipToNext()
     }
 
     override fun onSkipToQueueItem(position: Int) {
-        mediaController.transportControls?.skipToQueueItem(position.toLong())
+        mediaController?.transportControls?.skipToQueueItem(position.toLong())
     }
 
     override fun unregisterMediaController() {
-        mediaController.unregisterCallback(mediaControllerCallback)
+        mediaController?.unregisterCallback(mediaControllerCallback)
     }
 
     private fun setInitialPlayerState() {
-        view.scrollCarouselToPosition(exoPlayer.currentWindowIndex)
-        mediaControllerCallback.onPlaybackStateChanged(mediaController.playbackState)
-        mediaControllerCallback.onMetadataChanged(mediaController.metadata)
+        view.scrollCarouselToPosition(exoPlayer?.currentWindowIndex ?: 0)
+        mediaControllerCallback.onPlaybackStateChanged(mediaController?.playbackState)
+        mediaControllerCallback.onMetadataChanged(mediaController?.metadata)
     }
 }
