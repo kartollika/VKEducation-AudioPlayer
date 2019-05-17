@@ -37,6 +37,7 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kartollika.vkeducation.audioplayer.R
+import kartollika.vkeducation.audioplayer.common.utils.getRandomPreviewImage
 
 
 class PlayerService : Service() {
@@ -110,7 +111,11 @@ class PlayerService : Service() {
 
                     tracks.add(
                         AudioTrack(
-                            artist = artist, title = title, howLong = length, uri = Uri.parse(data)
+                            artist = artist,
+                            title = title,
+                            howLong = length,
+                            uri = Uri.parse(data),
+                            albumArt = getRandomPreviewImage(applicationContext)
                         )
                     )
                 }
@@ -335,7 +340,7 @@ class PlayerService : Service() {
         )
 
         metadataBuilder.putString(
-            MediaMetadataCompat.METADATA_KEY_ART_URI, track.albumArt.toString()
+            MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI, track.albumArt.toString()
         )
         mediaSession.setMetadata(metadataBuilder.build())
     }
