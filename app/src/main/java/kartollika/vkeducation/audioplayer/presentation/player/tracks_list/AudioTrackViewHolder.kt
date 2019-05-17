@@ -13,7 +13,6 @@ class AudioTrackViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private var previewImage: ImageView = itemView.albumPreviewImageView
 
     fun bind(audioTrack: AudioTrack) {
-        val albumArt = audioTrack.albumArt
-        previewImage.setImageResource(albumArt)
+        previewImage.setImageResource(audioTrack.albumArt)
     }
 }
