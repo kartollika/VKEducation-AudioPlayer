@@ -58,7 +58,7 @@ class PlayerService : Service() {
     private var metadataBuilder = MediaMetadataCompat.Builder()
     private val tracksChangesListeners: MutableList<OnTracksChangesListener> = mutableListOf()
 
-    private val stateBuilder: PlaybackStateCompat.Builder = Builder().setActions(
+    private val stateBuilder: Builder = Builder().setActions(
         ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS or ACTION_PLAY_FROM_URI
     )
 
@@ -147,15 +147,14 @@ class PlayerService : Service() {
 
                     mediaSession.setPlaybackState(
                         stateBuilder.setState(
-                            PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS,
-                            playerRepository.getCurrentIndexAsLong(),
-                            1f
+                            STATE_SKIPPING_TO_PREVIOUS, playerRepository.getCurrentIndexAsLong(), 1f
                         ).build()
                     )
                     onPlay()
                 }
             }
 
+            @Suppress("DEPRECATION")
             override fun onPlay() {
                 super.onPlay()
 
@@ -192,15 +191,14 @@ class PlayerService : Service() {
 
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
-                        PlaybackStateCompat.STATE_PLAYING,
-                        playerRepository.getCurrentIndexAsLong(),
-                        1f
+                        STATE_PLAYING, playerRepository.getCurrentIndexAsLong(), 1f
                     ).build()
                 )
 
                 updateForegroundNotification()
             }
 
+            @Suppress("DEPRECATION")
             override fun onStop() {
                 super.onStop()
 
@@ -219,9 +217,7 @@ class PlayerService : Service() {
 
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
-                        PlaybackStateCompat.STATE_STOPPED,
-                        playerRepository.getCurrentIndexAsLong(),
-                        1f
+                        STATE_STOPPED, playerRepository.getCurrentIndexAsLong(), 1f
                     ).build()
                 )
 
@@ -252,13 +248,13 @@ class PlayerService : Service() {
 
                     mediaSession.setPlaybackState(
                         stateBuilder.setState(
-                            PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM, id, 1f
+                            STATE_SKIPPING_TO_QUEUE_ITEM, id, 1f
                         ).build()
                     )
 
                     mediaSession.setPlaybackState(
                         stateBuilder.setState(
-                            PlaybackStateCompat.STATE_PLAYING, id, 1f
+                            STATE_PLAYING, id, 1f
                         ).build()
                     )
                     onPlay()
@@ -280,9 +276,7 @@ class PlayerService : Service() {
 
                     mediaSession.setPlaybackState(
                         stateBuilder.setState(
-                            PlaybackStateCompat.STATE_SKIPPING_TO_NEXT,
-                            playerRepository.getCurrentIndexAsLong(),
-                            1f
+                            STATE_SKIPPING_TO_NEXT, playerRepository.getCurrentIndexAsLong(), 1f
                         ).build()
                     )
                     onPlay()
@@ -299,9 +293,7 @@ class PlayerService : Service() {
 
                 mediaSession.setPlaybackState(
                     stateBuilder.setState(
-                        PlaybackStateCompat.STATE_PAUSED,
-                        playerRepository.getCurrentIndexAsLong(),
-                        1f
+                        STATE_PAUSED, playerRepository.getCurrentIndexAsLong(), 1f
                     ).build()
                 )
                 updateForegroundNotification()
@@ -562,13 +554,13 @@ class PlayerService : Service() {
     private fun updateForegroundNotification() {
         val playbackState = mediaSession.controller.playbackState
         when (playbackState.state) {
-            PlaybackStateCompat.STATE_PLAYING -> {
+            STATE_PLAYING -> {
                 startForeground(
                     notificationId, getNotificationForState(playbackState)
                 )
             }
 
-            PlaybackStateCompat.STATE_PAUSED -> {
+            STATE_PAUSED -> {
                 NotificationManagerCompat.from(applicationContext)
                     .notify(notificationId, getNotificationForState(playbackState))
                 stopForeground(false)
@@ -590,18 +582,18 @@ class PlayerService : Service() {
                     R.drawable.ic_skip_previous_48,
                     "Next",
                     MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        applicationContext, PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+                        applicationContext, ACTION_SKIP_TO_PREVIOUS
                     )
                 ).build()
             )
 
-            if (state.state == PlaybackStateCompat.STATE_PLAYING) {
+            if (state.state == STATE_PLAYING) {
                 addAction(
                     NotificationCompat.Action.Builder(
                         R.drawable.ic_pause_28,
                         "Pause",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(
-                            applicationContext, PlaybackStateCompat.ACTION_PAUSE
+                            applicationContext, ACTION_PAUSE
                         )
                     ).build()
                 )
@@ -611,7 +603,7 @@ class PlayerService : Service() {
                         R.drawable.ic_play_28,
                         "Play",
                         MediaButtonReceiver.buildMediaButtonPendingIntent(
-                            applicationContext, PlaybackStateCompat.ACTION_PLAY
+                            applicationContext, ACTION_PLAY
                         )
                     ).build()
                 )
@@ -622,18 +614,28 @@ class PlayerService : Service() {
                     R.drawable.ic_skip_next_48,
                     "Next",
                     MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        applicationContext, PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                        applicationContext, ACTION_SKIP_TO_NEXT
                     )
                 ).build()
             )
 
+            addAction(
+                NotificationCompat.Action.Builder(
+                    R.drawable.ic_close_black_24dp,
+                    "Close",
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        applicationContext,
+                        ACTION_STOP
+                    )
+                ).build()
+            )
 
             setStyle(
-                MediaStyle().setShowActionsInCompactView(0, 1, 2).setShowCancelButton(
+                MediaStyle().setShowActionsInCompactView(0, 1, 2, 3).setShowCancelButton(
                     true
                 ).setCancelButtonIntent(
                     MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        applicationContext, PlaybackStateCompat.ACTION_STOP
+                        applicationContext, ACTION_STOP
                     )
                 )
             )
