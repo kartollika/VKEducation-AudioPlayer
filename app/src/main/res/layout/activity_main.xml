@@ -56,6 +56,7 @@
     <kartollika.vkeducation.audioplayer.presentation.player.FloatingBottomPlayer
         android:id="@+id/floatingBottomPlayerView"
         android:layout_width="match_parent"
+        app:peekHeight="60dp"
         android:layout_height="match_parent"
         app:layout_behavior="android.support.design.widget.BottomSheetBehavior" />
 
