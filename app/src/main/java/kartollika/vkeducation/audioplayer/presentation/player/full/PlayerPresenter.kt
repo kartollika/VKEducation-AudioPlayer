@@ -20,16 +20,12 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
                     view.scrollCarouselToPosition(state.position.toInt())
                 }
 
-                PlaybackStateCompat.STATE_STOPPED -> {
-
+                PlaybackStateCompat.STATE_STOPPED, PlaybackStateCompat.STATE_PAUSED -> {
+                    view.switchToPlayAction()
                 }
 
                 PlaybackStateCompat.STATE_PLAYING -> {
                     view.switchToPauseAction()
-                }
-
-                PlaybackStateCompat.STATE_PAUSED -> {
-                    view.switchToPlayAction()
                 }
             }
         }
