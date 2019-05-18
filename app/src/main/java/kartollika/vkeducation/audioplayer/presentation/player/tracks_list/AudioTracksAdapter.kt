@@ -20,7 +20,7 @@ class AudioTracksAdapter(var audioTracks: List<AudioTrack> = mutableListOf()) :
 
     override fun onCreateViewHolder(container: ViewGroup, p1: Int): AudioTrackViewHolder {
         val view = LayoutInflater.from(container.context).inflate(
-            R.layout.audiotrack_item, container, false
+            R.layout.audiotrack_item, null
         )
         return AudioTrackViewHolder(view)
     }
