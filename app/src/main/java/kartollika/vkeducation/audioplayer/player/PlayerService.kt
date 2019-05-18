@@ -115,7 +115,7 @@ class PlayerService : Service() {
                             title = title,
                             howLong = length,
                             uri = Uri.parse(data),
-                            albumArt = getRandomPreviewImage(applicationContext)
+                            albumArt = getRandomPreviewImage()
                         )
                     )
                 }
