@@ -19,6 +19,7 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
+import kartollika.vkeducation.audioplayer.common.utils.onRenderFinished
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.presentation.folder_chooser.FolderChooserActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -35,7 +36,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     private var playerService: PlayerService? = null
     private var isPlayerBounded = false
     private var binder: Binder? = null
-
+    private var isPlayerExpanded = false
 
     private var serviceConnection: ServiceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, binder: IBinder?) {
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
         if (savedInstanceState != null) {
             isPlayerBounded = savedInstanceState.getBoolean("ServiceState")
+            isPlayerExpanded = savedInstanceState.getBoolean("PlayerExpanded")
         }
         setContentView(kartollika.vkeducation.audioplayer.R.layout.activity_main)
 
@@ -62,16 +64,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
             presenter.onOpenFolderAction()
         }
 
-        floatingBottomPlayerView.initPlayerFragment(supportFragmentManager)
-        floatingBottomPlayerView.initMiniPlayerFragment(supportFragmentManager)
-        floatingBottomPlayerView.addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(p0: View, p1: Float) {
-
-            }
-
-            override fun onStateChanged(p0: View, p1: Int) {
-            }
-        })
+        initializeFloatingBottomPlayer()
         bindPlayerService()
     }
 
@@ -82,6 +75,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         savedInstanceState.putBoolean("ServiceState", isPlayerBounded)
+        savedInstanceState.putBoolean("PlayerExpanded", floatingBottomPlayerView.isExpanded())
         super.onSaveInstanceState(savedInstanceState)
     }
 
@@ -111,9 +105,53 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         super.onBackPressed()
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.size == 1) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                presenter.onOpenFolderStoragePermissionGranted()
+                bindPlayerService()
+            }
+
+            if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                if (!ActivityCompat.shouldShowRequestPermissionRationale(
+                        this, Manifest.permission.READ_EXTERNAL_STORAGE
+                    )
+                ) {
+                    createStoragePermissionDialog().show()
+                }
+            }
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
     override fun openFolderSelectView() {
         val intent = Intent(this, FolderChooserActivity::class.java)
         startActivityForResult(intent, FolderChooserActivity.FOLDER_CHOOSE_REQUEST_CODE)
+    }
+
+    private fun initializeFloatingBottomPlayer() {
+        floatingBottomPlayerView.apply {
+            initPlayerFragment(supportFragmentManager)
+            initMiniPlayerFragment(supportFragmentManager)
+            addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onSlide(p0: View, p1: Float) {
+                }
+
+                override fun onStateChanged(p0: View, p1: Int) {
+                }
+            })
+
+            onRenderFinished(floatingBottomPlayerView, Runnable {
+                runOnUiThread {
+                    if (isPlayerExpanded) {
+                        expandSheet()
+                    } else {
+                        collapseSheet()
+                    }
+                }
+            })
+        }
     }
 
     private fun bindPlayerService() {
@@ -157,26 +195,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 )
             }
         }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-        if (requestCode == PERMISSION_REQUEST_CODE && grantResults.size == 1) {
-            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                presenter.onOpenFolderStoragePermissionGranted()
-                bindPlayerService()
-            }
-
-            if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
-                if (!ActivityCompat.shouldShowRequestPermissionRationale(
-                        this, Manifest.permission.READ_EXTERNAL_STORAGE
-                    )
-                ) {
-                    createStoragePermissionDialog().show()
-                }
-            }
-        }
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
 
     private fun isStoragePermissionGranted(): Boolean {

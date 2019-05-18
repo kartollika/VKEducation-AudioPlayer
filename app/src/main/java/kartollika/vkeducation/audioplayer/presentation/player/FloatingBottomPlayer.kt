@@ -63,7 +63,6 @@ class FloatingBottomPlayer(
 
     fun initPlayerFragment(fragmentManager: FragmentManager) {
         fragmentManager.beginTransaction().replace(R.id.audioPlayerContainerView, PlayerFragment.newInstance()).commit()
-
         initSmoothAnimations()
     }
 
