@@ -22,7 +22,6 @@ import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
-import kartollika.vkeducation.audioplayer.common.utils.onRenderFinished
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.presentation.folder_chooser.FolderChooserActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -106,7 +105,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         savedInstanceState.putBoolean("ServiceState", isPlayerBounded)
-//        savedInstanceState.putBoolean("PlayerExpanded", floatingBottomPlayerView.isExpanded())
+        savedInstanceState.putBoolean("PlayerExpanded", floatingBottomPlayerView.isExpanded())
         super.onSaveInstanceState(savedInstanceState)
     }
 
@@ -181,15 +180,13 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 }
             })
 
-            onRenderFinished(floatingBottomPlayerView, Runnable {
-                runOnUiThread {
-                    /*if (isPlayerExpanded) {
-                        expandSheet()
-                    } else {
-                        collapseSheet()
-                    }*/
+            post {
+                if (isPlayerExpanded) {
+                    expandSheet()
+                } else {
+                    collapseSheet()
                 }
-            })
+            }
         }
     }
 
