@@ -59,7 +59,7 @@
         app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toEndOf="@+id/shuffleActionView"
         app:layout_constraintTop_toTopOf="@+id/pausePlayActionView"
-        app:srcCompat="@drawable/ic_mini_player_next_28" />
+        app:srcCompat="@drawable/skip_next_48" />
 
     <ImageView
         android:id="@+id/shuffleActionView"
@@ -88,7 +88,7 @@
         app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toEndOf="@+id/pausePlayActionView"
         app:layout_constraintTop_toTopOf="@+id/pausePlayActionView"
-        app:srcCompat="@drawable/ic_mini_player_next_28"
+        app:srcCompat="@drawable/skip_next_48"
         tools:visibility="visible" />
 
 
