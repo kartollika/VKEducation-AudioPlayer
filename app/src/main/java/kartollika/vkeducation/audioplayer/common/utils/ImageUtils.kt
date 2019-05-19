@@ -1,6 +1,5 @@
 package kartollika.vkeducation.audioplayer.common.utils
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.net.Uri
 import android.widget.ImageView
@@ -16,7 +15,7 @@ fun ImageView.setImageResource(imageResource: Any) {
     }
 }
 
-fun getRandomPreviewImage(context: Context): Int {
+fun getRandomPreviewImage(): Int {
     return when (Random().nextInt(5)) {
         0 -> R.drawable.preview1
         1 -> R.drawable.preview2
