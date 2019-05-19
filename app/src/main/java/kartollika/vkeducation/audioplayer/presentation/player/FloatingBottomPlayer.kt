@@ -42,8 +42,6 @@ class FloatingBottomPlayer(
         LayoutInflater.from(context).inflate(R.layout.view_bottom_sheet_audio_player, this, true)
 
         onRenderFinished(this, Runnable {
-
-
             val layoutParams = layoutParams as CoordinatorLayout.LayoutParams
             bottomSheetBehavior = layoutParams.behavior as BottomSheetBehavior<View>
             bottomSheetBehavior.peekHeight = peekHeightDp

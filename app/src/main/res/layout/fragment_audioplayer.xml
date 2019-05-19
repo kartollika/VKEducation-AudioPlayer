@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginEnd="46dp"
-        android:background="@drawable/ic_mini_player_next_28"
+        android:background="@drawable/skip_next_48"
         android:scaleX="-1"
         app:layout_constraintBottom_toBottomOf="@+id/pausePlayActionView"
         app:layout_constraintEnd_toStartOf="@+id/pausePlayActionView"
@@ -66,7 +66,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginStart="46dp"
-        android:src="@drawable/ic_mini_player_next_28"
+        android:src="@drawable/skip_next_48"
         app:layout_constraintBottom_toBottomOf="@+id/pausePlayActionView"
         app:layout_constraintStart_toEndOf="@+id/pausePlayActionView"
         app:layout_constraintTop_toTopOf="@+id/pausePlayActionView" />

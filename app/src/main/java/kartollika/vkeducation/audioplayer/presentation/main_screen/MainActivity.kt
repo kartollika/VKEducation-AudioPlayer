@@ -71,7 +71,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
             mediaController =
                 MediaControllerCompat(applicationContext, binder.getMediaSessionToken())
             mediaController!!.registerCallback(mediaControllerCallback)
-            mediaControllerCallback.onPlaybackStateChanged(mediaController!!.playbackState)
             isPlayerBounded = true
         }
 
@@ -105,7 +104,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
         savedInstanceState.putBoolean("ServiceState", isPlayerBounded)
-        savedInstanceState.putBoolean("PlayerExpanded", floatingBottomPlayerView.isExpanded())
+        savedInstanceState.putBoolean("PlayerExpanded", isPlayerExpanded)
         super.onSaveInstanceState(savedInstanceState)
     }
 
@@ -176,7 +175,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 override fun onSlide(p0: View, p1: Float) {
                 }
 
-                override fun onStateChanged(p0: View, p1: Int) {
+                override fun onStateChanged(p0: View, state: Int) {
+                    isPlayerExpanded = floatingBottomPlayerView.isExpanded()
                 }
             })
 
@@ -186,6 +186,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 } else {
                     collapseSheet()
                 }
+                mediaControllerCallback.onPlaybackStateChanged(mediaController!!.playbackState)
             }
         }
     }
