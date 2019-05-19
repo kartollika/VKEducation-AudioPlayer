@@ -18,6 +18,7 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
 
     private val handler = Handler()
     private val updateSongLeftRunnable = Runnable { updateSongLeft() }
+    private lateinit var onTracksChangesListener: PlayerService.OnTracksChangesListener
 
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
@@ -57,7 +58,7 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
 
     override fun setPlayerService(playerService: PlayerService) {
         super.setPlayerService(playerService)
-        playerService.addOnTracksChangedListener(object : PlayerService.OnTracksChangesListener {
+        onTracksChangesListener = object : PlayerService.OnTracksChangesListener {
             override fun onTracksChanged(tracks: List<AudioTrack>) {
                 view.changeControlsState(tracks.isNotEmpty())
                 if (tracks.isEmpty()) {
@@ -65,38 +66,44 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
                     mediaControllerCallback.onMetadataChanged(null)
                 }
             }
-        })
+        }
+        playerService.addOnTracksChangedListener(onTracksChangesListener)
         view.changeControlsState(playerService.getActiveTracks().isNotEmpty())
     }
 
     override fun onPlayAction() {
-        mediaController.transportControls.play()
+        mediaController?.transportControls?.play()
     }
 
     override fun onPauseAction() {
-        mediaController.transportControls.pause()
+        mediaController?.transportControls?.pause()
     }
 
     override fun onNextAction() {
-        mediaController.transportControls.skipToNext()
+        mediaController?.transportControls?.skipToNext()
     }
 
     override fun unregisterMediaController() {
-        mediaController.unregisterCallback(mediaControllerCallback)
+        mediaController?.unregisterCallback(mediaControllerCallback)
+        mediaController = null
     }
 
     @SuppressLint("SetTextI18n")
     private fun updateSongLeft() {
         handler.removeCallbacks(updateSongLeftRunnable)
-        val playbackState = exoPlayer.playbackState
+        val playbackState = exoPlayer?.playbackState
 
         if (playbackState != Player.STATE_IDLE && playbackState != Player.STATE_ENDED) {
 
             if (playbackState == Player.STATE_READY) {
-                view.updateDurationLeft("-${(exoPlayer.duration - exoPlayer.currentPosition).parseIntToLength()}")
+                val newSongLeftTime =
+                    (exoPlayer?.duration ?: 0L) - (exoPlayer?.currentPosition ?: 0L)
+                view.updateDurationLeft(
+                    "-${newSongLeftTime.parseIntToLength()}"
+                )
             }
 
-            var delayMs = 1000 - (exoPlayer.currentPosition % 1000)
+            var delayMs = 1000 - (exoPlayer?.currentPosition ?: 0 % 1000)
             if (delayMs < 200) {
                 delayMs += 1000
             } else {
@@ -108,8 +115,12 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
         }
     }
 
+    override fun onDestroy() {
+        playerService?.removeOnTracksChangedListener(onTracksChangesListener)
+    }
+
     private fun setInitialPlayerState() {
-        mediaControllerCallback.onPlaybackStateChanged(mediaController.playbackState)
-        mediaControllerCallback.onMetadataChanged(mediaController.metadata)
+        mediaControllerCallback.onPlaybackStateChanged(mediaController?.playbackState)
+        mediaControllerCallback.onMetadataChanged(mediaController?.metadata)
     }
 }

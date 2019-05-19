@@ -9,9 +9,9 @@ import kartollika.vkeducation.audioplayer.player.PlayerService
 abstract class PlayerBasePresenter<T : MvpView>(view: T) : BasePresenter<T>(view),
     PlayerBaseContract.PlayerBasePresenter {
 
-    internal lateinit var mediaController: MediaControllerCompat
-    internal lateinit var exoPlayer: ExoPlayer
-    internal lateinit var playerService: PlayerService
+    internal var mediaController: MediaControllerCompat? = null
+    internal var exoPlayer: ExoPlayer? = null
+    internal var playerService: PlayerService? = null
 
     override fun setPlayerService(playerService: PlayerService) {
         this.playerService = playerService
