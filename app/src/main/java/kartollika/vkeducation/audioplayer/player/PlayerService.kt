@@ -51,12 +51,12 @@ class PlayerService : Service() {
     private var lastPlayedDirectory: String = ""
     private lateinit var audioManager: AudioManager
     private lateinit var audioFocusRequest: AudioFocusRequest
-
     private val notificationId = 234
     private var cursorLoader: CursorLoader? = null
     private val notificationChannelId = PlayerService::class.java.name
     private var metadataBuilder = MediaMetadataCompat.Builder()
     private val tracksChangesListeners: MutableList<OnTracksChangesListener> = mutableListOf()
+    private var serviceId = -1
 
     private val stateBuilder: Builder = Builder().setActions(
         ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS or ACTION_PLAY_FROM_URI
@@ -130,7 +130,7 @@ class PlayerService : Service() {
 
             override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
                 super.onPlayFromUri(uri, extras)
-                startLoadingAudiosData(uri, needToStart = true)
+                startLoadingAudiosData(uri)
             }
 
             override fun onSkipToPrevious() {
@@ -181,10 +181,7 @@ class PlayerService : Service() {
                             return
                         }
                     }
-                    registerReceiver(
-                        becomingNoisyBroadcastReceiver,
-                        IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
-                    )
+                    registerNoisyReceiver()
                 }
 
                 mediaSession.isActive = true
@@ -204,7 +201,7 @@ class PlayerService : Service() {
 
                 if (exoPlayer?.playWhenReady == true) {
                     exoPlayer?.playWhenReady = false
-                    unregisterReceiver(becomingNoisyBroadcastReceiver)
+                    unregisterNoisyReceiver()
                 }
 
                 mediaSession.isActive = false
@@ -288,7 +285,7 @@ class PlayerService : Service() {
 
                 if (exoPlayer?.playWhenReady == true) {
                     exoPlayer?.playWhenReady = false
-                    unregisterReceiver(becomingNoisyBroadcastReceiver)
+                    unregisterNoisyReceiver()
                 }
 
                 mediaSession.setPlaybackState(
@@ -299,7 +296,7 @@ class PlayerService : Service() {
                 updateForegroundNotification()
             }
 
-            private fun startLoadingAudiosData(uri: Uri?, needToStart: Boolean) {
+            private fun startLoadingAudiosData(uri: Uri?) {
                 val path = uri.toString()
                 val uriQuery = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 val selection =
@@ -313,8 +310,13 @@ class PlayerService : Service() {
                     1, getOnLoadCompleteListener(object : OnQueryListener {
                         override fun onQuery(tracks: List<AudioTrack>) {
                             val reloadType = reloadTracks(path, tracks)
-                            if (needToStart && tracks.isNotEmpty() && reloadType == ReloadType.Cold) {
+                            if (tracks.isNotEmpty()) {
                                 onPlay()
+                                return
+                            }
+
+                            if (tracks.isEmpty()) {
+                                onStop()
                                 return
                             }
                         }
@@ -386,7 +388,7 @@ class PlayerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         MediaButtonReceiver.handleIntent(mediaSession, intent)
-        return super.onStartCommand(intent, flags, startId)
+        return START_STICKY
     }
 
     override fun onDestroy() {
@@ -438,16 +440,22 @@ class PlayerService : Service() {
         }
     }
 
-//    fun reloadTracksFromOutsize(folder: String) {
-//        mediaSessionCallbacks.onPrepareFromUri(Uri.parse(folder), null)
-//    }
-
     fun reloadPlayTracksFromOutsize(folder: String) {
         mediaSessionCallbacks.onPlayFromUri(Uri.parse(folder), null)
     }
 
     enum class ReloadType {
         Cold, Hot
+    }
+
+    private fun registerNoisyReceiver() {
+        registerReceiver(
+            becomingNoisyBroadcastReceiver, IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY)
+        )
+    }
+
+    private fun unregisterNoisyReceiver() {
+        unregisterReceiver(becomingNoisyBroadcastReceiver)
     }
 
     private fun reloadTracks(folderPath: String, tracks: List<AudioTrack>): ReloadType {
@@ -628,8 +636,7 @@ class PlayerService : Service() {
                     R.drawable.ic_close_black_24dp,
                     "Close",
                     MediaButtonReceiver.buildMediaButtonPendingIntent(
-                        applicationContext,
-                        ACTION_STOP
+                        applicationContext, ACTION_STOP
                     )
                 ).build()
             )
