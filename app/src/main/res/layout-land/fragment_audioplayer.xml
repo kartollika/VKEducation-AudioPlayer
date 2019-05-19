@@ -9,9 +9,7 @@
         android:id="@+id/tracksRecyclerView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="16dp"
+        android:layout_gravity="center_horizontal"
         android:clipChildren="false"
         android:clipToPadding="false"
         android:nestedScrollingEnabled="false"
@@ -25,8 +23,8 @@
         android:id="@+id/exo_controllers"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
         android:layout_marginBottom="8dp"
         app:controller_layout_id="@layout/player_controls"
         app:layout_constraintBottom_toTopOf="@+id/pausePlayActionView"
@@ -34,74 +32,78 @@
         app:layout_constraintStart_toStartOf="parent"
         app:show_timeout="0" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/pausePlayActionView"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:layout_marginBottom="16dp"
         android:background="@drawable/standart_circle_button_gradient"
         android:elevation="12dp"
-        android:padding="4dp"
+        android:padding="12dp"
         android:src="@drawable/ic_pause_48"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:visibility="visible" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/previousTrackActionView"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@drawable/ic_mini_player_next_28"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="36dp"
         android:scaleX="-1"
         app:layout_constraintBottom_toBottomOf="@+id/pausePlayActionView"
         app:layout_constraintEnd_toStartOf="@+id/pausePlayActionView"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.7"
         app:layout_constraintStart_toEndOf="@+id/shuffleActionView"
-        app:layout_constraintTop_toTopOf="@+id/pausePlayActionView" />
+        app:layout_constraintTop_toTopOf="@+id/pausePlayActionView"
+        app:srcCompat="@drawable/ic_mini_player_next_28" />
 
     <ImageView
         android:id="@+id/shuffleActionView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="bottom"
+        android:layout_marginStart="16dp"
         android:background="@drawable/standart_circle_button_gradient"
         android:elevation="12dp"
         android:padding="12dp"
         android:src="@drawable/ic_shuffle_24"
         app:layout_constraintBottom_toBottomOf="@+id/previousTrackActionView"
-        app:layout_constraintEnd_toStartOf="@+id/previousTrackActionView"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/exo_controllers"
         app:layout_constraintTop_toTopOf="@+id/previousTrackActionView"
         tools:visibility="visible" />
 
     <ImageView
         android:id="@+id/nextTrackActionView"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/ic_mini_player_next_28"
+        android:layout_marginStart="36dp"
+        android:layout_marginEnd="8dp"
         app:layout_constraintBottom_toBottomOf="@+id/pausePlayActionView"
         app:layout_constraintEnd_toStartOf="@+id/repeatActionView"
+        app:layout_constraintHorizontal_bias="0.3"
         app:layout_constraintStart_toEndOf="@+id/pausePlayActionView"
         app:layout_constraintTop_toTopOf="@+id/pausePlayActionView"
+        app:srcCompat="@drawable/ic_mini_player_next_28"
         tools:visibility="visible" />
 
 
     <ImageView
         android:id="@+id/repeatActionView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="bottom"
-        android:layout_marginEnd="14dp"
+        android:layout_marginEnd="16dp"
         android:background="@drawable/standart_circle_button_gradient"
         android:elevation="12dp"
         android:padding="12dp"
         android:src="@drawable/ic_repeat_24"
         app:layout_constraintBottom_toBottomOf="@+id/nextTrackActionView"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/exo_controllers"
         app:layout_constraintTop_toTopOf="@+id/nextTrackActionView"
         tools:visibility="visible" />
 
@@ -112,19 +114,12 @@
         android:layout_marginEnd="8dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:paddingLeft="26dp"
+        android:paddingLeft="8dp"
         android:paddingRight="26dp"
         app:layout_constraintBottom_toBottomOf="@+id/tracksRecyclerView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toTopOf="@+id/tracksRecyclerView">
-
-        <ImageButton
-            android:id="@+id/addActionView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?attr/actionBarItemBackground"
-            android:src="@drawable/ic_add_outline_24" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -168,13 +163,14 @@
 
             <TextView
                 android:id="@+id/songNameTextView"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:ellipsize="marquee"
                 android:focusable="true"
                 android:focusableInTouchMode="true"
                 android:fontFamily="@font/roboto"
+                android:gravity="center"
                 android:marqueeRepeatLimit="marquee_forever"
                 android:scrollHorizontally="true"
                 android:singleLine="true"
@@ -183,6 +179,14 @@
                 android:textSize="16sp" />
 
         </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/addActionView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="24dp"
+            android:background="?attr/actionBarItemBackground"
+            android:src="@drawable/ic_add_outline_24" />
 
         <ImageButton
             android:id="@+id/moreActionsActionView"

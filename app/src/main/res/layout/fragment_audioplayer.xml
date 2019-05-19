@@ -4,10 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageButton
+    <ImageView
         android:id="@+id/previousTrackActionView"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginEnd="46dp"
         android:background="@drawable/ic_mini_player_next_28"
@@ -16,14 +16,14 @@
         app:layout_constraintEnd_toStartOf="@+id/pausePlayActionView"
         app:layout_constraintTop_toTopOf="@+id/pausePlayActionView" />
 
-    <ImageButton
+    <ImageView
         android:id="@+id/pausePlayActionView"
         android:layout_width="72dp"
         android:layout_height="72dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/standart_circle_button_gradient"
         android:elevation="12dp"
-        android:padding="4dp"
+        android:padding="12dp"
         android:src="@drawable/ic_pause_48"
         app:layout_constraintBottom_toTopOf="@+id/shuffleActionView"
         app:layout_constraintEnd_toEndOf="parent"
@@ -62,8 +62,8 @@
 
     <ImageView
         android:id="@+id/nextTrackActionView"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginStart="46dp"
         android:src="@drawable/ic_mini_player_next_28"

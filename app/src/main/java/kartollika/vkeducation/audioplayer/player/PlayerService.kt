@@ -309,7 +309,7 @@ class PlayerService : Service() {
                 cursorLoader!!.registerListener(
                     1, getOnLoadCompleteListener(object : OnQueryListener {
                         override fun onQuery(tracks: List<AudioTrack>) {
-                            val reloadType = reloadTracks(path, tracks)
+                            reloadTracks(path, tracks)
                             if (tracks.isNotEmpty()) {
                                 onPlay()
                                 return
