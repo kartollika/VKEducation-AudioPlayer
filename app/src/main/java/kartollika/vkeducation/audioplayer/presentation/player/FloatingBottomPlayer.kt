@@ -33,7 +33,8 @@ class FloatingBottomPlayer(
     private fun initAttributes() {
         val attributes =
             context.obtainStyledAttributes(attrs, R.styleable.FloatingBottomPlayer, defStyleAttr, 0)
-        peekHeightDp = attributes.getDimension(R.styleable.FloatingBottomPlayer_peekHeight, 0f).toInt()
+        peekHeightDp =
+            attributes.getDimension(R.styleable.FloatingBottomPlayer_peekHeight, 0f).toInt()
         attributes.recycle()
     }
 
@@ -74,7 +75,6 @@ class FloatingBottomPlayer(
     fun initPlayerFragment(fragmentManager: FragmentManager) {
         fragmentManager.beginTransaction()
             .replace(R.id.audioPlayerContainerView, PlayerFragment.newInstance()).commit()
-
         initSmoothAnimations()
     }
 
@@ -112,6 +112,20 @@ class FloatingBottomPlayer(
 
     fun expandSheet() {
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+    }
+
+    fun hideSheet() {
+        bottomSheetBehavior.isHideable = true
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+    }
+
+    fun showSheet() {
+        if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_HIDDEN) {
+            bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            post {
+                bottomSheetBehavior.isHideable = false
+            }
+        }
     }
 
 }
