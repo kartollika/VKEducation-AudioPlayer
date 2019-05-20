@@ -186,7 +186,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 } else {
                     collapseSheet()
                 }
-                mediaControllerCallback.onPlaybackStateChanged(mediaController!!.playbackState)
+                mediaControllerCallback.onPlaybackStateChanged(mediaController?.playbackState)
             }
         }
     }
