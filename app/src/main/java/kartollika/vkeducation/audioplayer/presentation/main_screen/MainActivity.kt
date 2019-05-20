@@ -94,7 +94,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
             presenter.onOpenFolderAction()
         }
         initializeFloatingBottomPlayer()
-        bindPlayerService()
+        bindPlayerService(0)
     }
 
     override fun onDestroy() {
@@ -125,6 +125,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                         startService(playerServiceIntent)
                     }
 
+                    unbindPlayerService()
+                    bindPlayerService(Context.BIND_AUTO_CREATE)
                     playerService?.reloadPlayTracksFromOutsize(folder)
                 }
             }
@@ -147,7 +149,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.size == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 presenter.onOpenFolderStoragePermissionGranted()
-                bindPlayerService()
+//                bindPlayerService()
             }
 
             if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
@@ -191,8 +193,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         }
     }
 
-    private fun bindPlayerService() {
-        bindService(getPlayerServiceIntent(), serviceConnection, Context.BIND_AUTO_CREATE)
+    private fun bindPlayerService(flag: Int) {
+        bindService(getPlayerServiceIntent(), serviceConnection, flag)
         isPlayerBounded = true
     }
 
