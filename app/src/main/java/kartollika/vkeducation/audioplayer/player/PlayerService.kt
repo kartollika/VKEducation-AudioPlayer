@@ -388,7 +388,7 @@ class PlayerService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         MediaButtonReceiver.handleIntent(mediaSession, intent)
-        return START_STICKY
+        return START_NOT_STICKY
     }
 
     override fun onDestroy() {
@@ -575,7 +575,6 @@ class PlayerService : Service() {
             STATE_PAUSED -> {
                 NotificationManagerCompat.from(applicationContext)
                     .notify(notificationId, getNotificationForState(playbackState))
-                stopForeground(false)
             }
 
             else -> {
