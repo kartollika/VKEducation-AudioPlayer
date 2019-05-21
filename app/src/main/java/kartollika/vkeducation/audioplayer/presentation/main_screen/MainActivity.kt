@@ -247,9 +247,9 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                     this, Manifest.permission.READ_EXTERNAL_STORAGE
                 )
             ) {
-                AlertDialog.Builder(this).setTitle("Разрешение")
-                    .setMessage("Для выбора разделя для проигрывания аудио необходимо предоставить разрешение приложению")
-                    .setPositiveButton("Ok") { _, _ ->
+                AlertDialog.Builder(this).setTitle(getString(R.string.permission_title))
+                    .setMessage(getString(R.string.permission_ask_can_do_from_application))
+                    .setPositiveButton(getString(R.string.ok)) { _, _ ->
                         run {
                             ActivityCompat.requestPermissions(
                                 this,
@@ -275,11 +275,11 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     }
 
     private fun createStoragePermissionDialog(): AlertDialog {
-        return AlertDialog.Builder(this).setTitle("Разрешение")
-            .setMessage("Для выбора разделя для проигрывания аудио необходимо вручную предоставить разрешение приложению")
-            .setPositiveButton("Настройки") { _, _ ->
+        return AlertDialog.Builder(this).setTitle(getString(R.string.permission_title))
+            .setMessage(getString(R.string.permission_ask_grant_via_settings))
+            .setPositiveButton(getString(R.string.settings_title)) { _, _ ->
                 openApplicationSettings(PERMISSION_GRANT_VIA_SETTINGS_REQUEST_CODE)
-            }.setNegativeButton("Отмена") { dialog, _ -> dialog.dismiss() }.create()
+            }.setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss() }.create()
     }
 
     private fun openApplicationSettings(requestCode: Int) {
