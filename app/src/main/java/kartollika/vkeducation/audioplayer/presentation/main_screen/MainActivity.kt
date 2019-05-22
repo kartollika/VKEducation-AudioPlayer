@@ -1,6 +1,7 @@
 package kartollika.vkeducation.audioplayer.presentation.main_screen
 
 import android.Manifest
+import android.animation.ArgbEvaluator
 import android.app.Activity
 import android.content.ComponentName
 import android.content.Context
@@ -21,6 +22,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.support.v7.app.AlertDialog
 import android.support.v7.app.AppCompatActivity
 import android.view.View
+import android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
 import kartollika.vkeducation.audioplayer.R
 import kartollika.vkeducation.audioplayer.common.utils.PreferencesUtils
 import kartollika.vkeducation.audioplayer.player.PlayerService
@@ -41,6 +43,9 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     private var binder: Binder? = null
     private var isPlayerExpanded = false
     private var mediaController: MediaControllerCompat? = null
+
+    private var defaultStatusBarColor: Int = 0
+    private var expandedStatusBarColor: Int = 0
 
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
@@ -82,7 +87,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(kartollika.vkeducation.audioplayer.R.layout.activity_main)
+        setContentView(R.layout.activity_main)
 
         presenter = MainActivityPresenter(this)
 
@@ -96,6 +101,13 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         }
         initializeFloatingBottomPlayer()
         bindPlayerService(0)
+
+        initColors()
+    }
+
+    private fun initColors() {
+        defaultStatusBarColor = ContextCompat.getColor(this, R.color.colorPrimaryDark)
+        expandedStatusBarColor = ContextCompat.getColor(this, android.R.color.black)
     }
 
     override fun onDestroy() {
@@ -175,7 +187,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
             initPlayerFragment(supportFragmentManager)
             initMiniPlayerFragment(supportFragmentManager)
             addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onSlide(p0: View, p1: Float) {
+                override fun onSlide(p0: View, offset: Float) {
+                    changeColorOnBottomSheetSlide(offset)
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
@@ -192,6 +205,24 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 mediaControllerCallback.onPlaybackStateChanged(mediaController?.playbackState)
             }
         }
+    }
+
+    private fun changeColorOnBottomSheetSlide(offset: Float) {
+        if (offset >= 0.5) {
+            window.decorView.systemUiVisibility = 0
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                window.decorView.systemUiVisibility = SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            }
+        }
+        window.statusBarColor = ArgbEvaluator().evaluate(
+            if (offset < 0) {
+                0f
+            } else {
+                offset
+            }, defaultStatusBarColor, expandedStatusBarColor
+        ) as Int
+        rootBlackOverlay.alpha = offset
     }
 
     private fun bindPlayerService(flag: Int) {

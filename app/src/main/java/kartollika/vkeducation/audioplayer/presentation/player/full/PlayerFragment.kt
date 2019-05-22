@@ -16,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.exoplayer2.ExoPlayer
 import kartollika.vkeducation.audioplayer.R
+import kartollika.vkeducation.audioplayer.common.utils.onRenderFinished
 import kartollika.vkeducation.audioplayer.common.views.AlphaAndZoomCentralLayoutManager
 import kartollika.vkeducation.audioplayer.common.views.SnapOnScrollListener
 import kartollika.vkeducation.audioplayer.common.views.attachSnapHelperWithListener
@@ -61,11 +62,6 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
         presenter = PlayerPresenter(this)
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        bindPlayerService()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_audioplayer, null)
@@ -78,6 +74,8 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
 
         songNameTextView.isSelected = true
         artistNameTextView.isSelected = true
+
+        bindPlayerService()
     }
 
     override fun onDestroy() {
@@ -127,10 +125,12 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
     }
 
     override fun fillActiveTracks(tracks: List<AudioTrack>) {
-        tracksAdapter.apply {
-            audioTracks = tracks
-            notifyDataSetChanged()
-        }
+        onRenderFinished(tracksRecyclerView, Runnable {
+            tracksAdapter.apply {
+                audioTracks = tracks
+                notifyDataSetChanged()
+            }
+        })
     }
 
     override fun showDummyArtistAndSong() {

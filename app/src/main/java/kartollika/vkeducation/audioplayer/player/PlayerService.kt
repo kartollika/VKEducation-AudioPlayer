@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.database.Cursor
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -17,8 +16,6 @@ import android.os.IBinder
 import android.provider.MediaStore
 import android.support.v4.app.NotificationCompat
 import android.support.v4.app.NotificationManagerCompat
-import android.support.v4.content.CursorLoader
-import android.support.v4.content.Loader
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.app.NotificationCompat.MediaStyle
 import android.support.v4.media.session.MediaButtonReceiver
@@ -37,7 +34,7 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import kartollika.vkeducation.audioplayer.R
-import kartollika.vkeducation.audioplayer.common.utils.getRandomPreviewImage
+import kartollika.vkeducation.audioplayer.presentation.main_screen.MainActivity
 
 
 class PlayerService : Service() {
@@ -52,11 +49,18 @@ class PlayerService : Service() {
     private lateinit var audioManager: AudioManager
     private lateinit var audioFocusRequest: AudioFocusRequest
     private val notificationId = 234
-    private var cursorLoader: CursorLoader? = null
     private val notificationChannelId = PlayerService::class.java.name
     private var metadataBuilder = MediaMetadataCompat.Builder()
     private val tracksChangesListeners: MutableList<OnTracksChangesListener> = mutableListOf()
-    private var serviceId = -1
+    private val tracksLoader = TracksLoader()
+
+    inner class AudioPlayerBinder : Binder() {
+        fun getService() = this@PlayerService
+
+        fun getMediaSessionToken(): MediaSessionCompat.Token {
+            return mediaSession.sessionToken
+        }
+    }
 
     private val stateBuilder: Builder = Builder().setActions(
         ACTION_PLAY or ACTION_STOP or ACTION_PAUSE or ACTION_PLAY_PAUSE or ACTION_SKIP_TO_NEXT or ACTION_SKIP_TO_PREVIOUS or ACTION_PLAY_FROM_URI
@@ -90,68 +94,12 @@ class PlayerService : Service() {
         }
     }
 
-    private interface OnQueryListener {
-        fun onQuery(tracks: List<AudioTrack>)
-    }
-
-    private var loaderListener: Loader.OnLoadCompleteListener<Cursor?>? = null
-
-    private fun getOnLoadCompleteListener(listener: OnQueryListener): Loader.OnLoadCompleteListener<Cursor?> {
-        loaderListener = Loader.OnLoadCompleteListener { _, cursor ->
-            val tracks = mutableListOf<AudioTrack>()
-            cursor?.let {
-                while (cursor.moveToNext()) {
-                    val data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA))
-                    val artist =
-                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST))
-                    val title =
-                        cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE))
-                    val length =
-                        cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))
-
-                    tracks.add(
-                        AudioTrack(
-                            artist = artist,
-                            title = title,
-                            howLong = length,
-                            uri = Uri.parse(data),
-                            albumArt = getRandomPreviewImage()
-                        )
-                    )
-                }
-            }
-            listener.onQuery(tracks)
-        }
-        return loaderListener!!
-    }
-
     private val mediaSessionCallbacks: MediaSessionCompat.Callback =
         object : MediaSessionCompat.Callback() {
 
             override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
                 super.onPlayFromUri(uri, extras)
                 startLoadingAudiosData(uri)
-            }
-
-            override fun onSkipToPrevious() {
-                super.onSkipToPrevious()
-                exoPlayer?.previous()
-
-                exoPlayer?.currentWindowIndex?.let { previousIndex ->
-                    playerRepository.skipTo(previousIndex)
-
-                    val previousTag = mediaSource.getMediaSource(previousIndex).tag!!
-                    playerRepository.getTrackByTag(previousTag)?.let { audio ->
-                        updateRelevantMetadata(audio)
-                    }
-
-                    mediaSession.setPlaybackState(
-                        stateBuilder.setState(
-                            STATE_SKIPPING_TO_PREVIOUS, playerRepository.getCurrentIndexAsLong(), 1f
-                        ).build()
-                    )
-                    onPlay()
-                }
             }
 
             @Suppress("DEPRECATION")
@@ -195,6 +143,22 @@ class PlayerService : Service() {
                 updateForegroundNotification()
             }
 
+            override fun onPause() {
+                super.onPause()
+
+                if (exoPlayer?.playWhenReady == true) {
+                    exoPlayer?.playWhenReady = false
+                    unregisterNoisyReceiver()
+                }
+
+                mediaSession.setPlaybackState(
+                    stateBuilder.setState(
+                        STATE_PAUSED, playerRepository.getCurrentIndexAsLong(), 1f
+                    ).build()
+                )
+                updateForegroundNotification()
+            }
+
             @Suppress("DEPRECATION")
             override fun onStop() {
                 super.onStop()
@@ -220,6 +184,27 @@ class PlayerService : Service() {
 
                 updateForegroundNotification()
                 stopSelf()
+            }
+
+            override fun onSkipToPrevious() {
+                super.onSkipToPrevious()
+                exoPlayer?.previous()
+
+                exoPlayer?.currentWindowIndex?.let { previousIndex ->
+                    playerRepository.skipTo(previousIndex)
+
+                    val previousTag = mediaSource.getMediaSource(previousIndex).tag!!
+                    playerRepository.getTrackByTag(previousTag)?.let { audio ->
+                        updateRelevantMetadata(audio)
+                    }
+
+                    mediaSession.setPlaybackState(
+                        stateBuilder.setState(
+                            STATE_SKIPPING_TO_PREVIOUS, playerRepository.getCurrentIndexAsLong(), 1f
+                        ).build()
+                    )
+                    onPlay()
+                }
             }
 
             override fun onSkipToQueueItem(id: Long) {
@@ -280,34 +265,18 @@ class PlayerService : Service() {
                 }
             }
 
-            override fun onPause() {
-                super.onPause()
-
-                if (exoPlayer?.playWhenReady == true) {
-                    exoPlayer?.playWhenReady = false
-                    unregisterNoisyReceiver()
-                }
-
-                mediaSession.setPlaybackState(
-                    stateBuilder.setState(
-                        STATE_PAUSED, playerRepository.getCurrentIndexAsLong(), 1f
-                    ).build()
-                )
-                updateForegroundNotification()
-            }
-
             private fun startLoadingAudiosData(uri: Uri?) {
                 val path = uri.toString()
                 val uriQuery = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
                 val selection =
                     MediaStore.Audio.Media.IS_MUSIC + " != 0 AND " + MediaStore.Audio.Media.DATA + " like ? AND " + MediaStore.Audio.Media.DATA + " NOT LIKE ? "
                 val selectionArgs = arrayOf("%$path%", "%$path/%/%")
-                cursorLoader = CursorLoader(
-                    applicationContext, uriQuery, null, selection, selectionArgs, null
-                )
 
-                cursorLoader!!.registerListener(
-                    1, getOnLoadCompleteListener(object : OnQueryListener {
+                tracksLoader.apply {
+                    initializeLoader(
+                        applicationContext, uriQuery, null, selection, selectionArgs, null
+                    )
+                    setOnLoadListener(object : TracksLoader.OnQueryListener {
                         override fun onQuery(tracks: List<AudioTrack>) {
                             reloadTracks(path, tracks)
                             if (tracks.isNotEmpty()) {
@@ -321,8 +290,8 @@ class PlayerService : Service() {
                             }
                         }
                     })
-                )
-                cursorLoader!!.startLoading()
+                    startLoading()
+                }
             }
         }
 
@@ -395,11 +364,7 @@ class PlayerService : Service() {
         super.onDestroy()
         mediaSession.release()
         exoPlayer?.release()
-        if (cursorLoader != null) {
-            cursorLoader!!.unregisterListener(loaderListener!!)
-            cursorLoader!!.cancelLoad()
-            cursorLoader!!.stopLoading()
-        }
+        tracksLoader.stopLoading()
     }
 
     fun addOnTracksChangedListener(tracksChangesListener: OnTracksChangesListener) {
@@ -553,14 +518,6 @@ class PlayerService : Service() {
         })
     }
 
-    inner class AudioPlayerBinder : Binder() {
-        fun getService() = this@PlayerService
-
-        fun getMediaSessionToken(): MediaSessionCompat.Token {
-            return mediaSession.sessionToken
-        }
-    }
-
     fun getExoPlayer() = exoPlayer
 
     private fun updateForegroundNotification() {
@@ -651,6 +608,16 @@ class PlayerService : Service() {
             )
             setOnlyAlertOnce(true)
             setSmallIcon(R.mipmap.ic_launcher).setShowWhen(false)
+            setContentIntent(
+                PendingIntent.getActivity(
+                    applicationContext,
+                    0,
+                    Intent(applicationContext, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    },
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+            )
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 setChannelId(notificationChannelId)
