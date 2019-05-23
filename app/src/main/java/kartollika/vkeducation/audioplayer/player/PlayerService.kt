@@ -132,6 +132,13 @@ class PlayerService : Service() {
                     registerNoisyReceiver()
                 }
 
+                exoPlayer?.currentWindowIndex?.let { currentIndex ->
+                    val currentTag = mediaSource.getMediaSource(currentIndex).tag!!
+                    playerRepository.getTrackByTag(currentTag)?.let { audio ->
+                        updateRelevantMetadata(audio)
+                    }
+                }
+
                 mediaSession.isActive = true
 
                 mediaSession.setPlaybackState(
@@ -504,9 +511,21 @@ class PlayerService : Service() {
         exoPlayer = ExoPlayerFactory.newSimpleInstance(this, trackSelection)
         exoPlayer!!.addListener(object : Player.EventListener {
 
+            private var hasEnded = false
+
             override fun onPlayerError(error: ExoPlaybackException?) {
                 super.onPlayerError(error)
                 mediaSessionCallbacks.onSkipToNext()
+            }
+
+            override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+                super.onPlayerStateChanged(playWhenReady, playbackState)
+                if (playbackState == Player.STATE_ENDED && hasEnded) {
+                    mediaSessionCallbacks.onPause()
+                    hasEnded = true
+                } else {
+                    hasEnded = false
+                }
             }
 
             override fun onPositionDiscontinuity(reason: Int) {
@@ -521,6 +540,10 @@ class PlayerService : Service() {
     fun getExoPlayer() = exoPlayer
 
     private fun updateForegroundNotification() {
+        if (mediaSession.controller.metadata == null) {
+            return
+        }
+
         val playbackState = mediaSession.controller.playbackState
         when (playbackState.state) {
             STATE_PLAYING -> {
