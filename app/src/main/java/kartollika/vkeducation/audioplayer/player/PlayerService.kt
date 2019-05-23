@@ -447,6 +447,11 @@ class PlayerService : Service() {
     private fun notifyAllOnTracksChangedListeners() {
         val activeTracks = getActiveTracks()
         tracksChangesListeners.forEach { it.onTracksChanged(activeTracks) }
+
+        val currentTag = mediaSource.getMediaSource(playerRepository.getCurrentIndex()).tag!!
+        playerRepository.getTrackByTag(currentTag)?.let { audio ->
+            updateRelevantMetadata(audio)
+        }
     }
 
     private fun doColdTracksReload(tracks: List<AudioTrack>): ConcatenatingMediaSource {
