@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.content.res.Configuration
 import android.os.Bundle
 import android.os.IBinder
 import android.support.v4.app.Fragment
@@ -15,6 +16,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.google.android.exoplayer2.ExoPlayer
 import kartollika.vkeducation.audioplayer.R
+import kartollika.vkeducation.audioplayer.common.utils.onRenderFinished
 import kartollika.vkeducation.audioplayer.common.views.AlphaAndZoomCentralLayoutManager
 import kartollika.vkeducation.audioplayer.common.views.SnapOnScrollListener
 import kartollika.vkeducation.audioplayer.common.views.attachSnapHelperWithListener
@@ -22,6 +24,7 @@ import kartollika.vkeducation.audioplayer.player.AudioTrack
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kartollika.vkeducation.audioplayer.presentation.player.tracks_list.AudioTracksAdapter
 import kotlinx.android.synthetic.main.fragment_audioplayer.*
+
 
 class PlayerFragment : Fragment(), PlayerContract.PlayerView {
 
@@ -59,11 +62,6 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
         presenter = PlayerPresenter(this)
     }
 
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-        bindPlayerService()
-    }
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_audioplayer, null)
@@ -76,10 +74,13 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
 
         songNameTextView.isSelected = true
         artistNameTextView.isSelected = true
+
+        bindPlayerService()
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        presenter.onDestroy()
         unbindService()
         presenter.unregisterMediaController()
     }
@@ -124,10 +125,12 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
     }
 
     override fun fillActiveTracks(tracks: List<AudioTrack>) {
-        tracksAdapter.apply {
-            audioTracks = tracks
-            notifyDataSetChanged()
-        }
+        onRenderFinished(tracksRecyclerView, Runnable {
+            tracksAdapter.apply {
+                audioTracks = tracks
+                notifyDataSetChanged()
+            }
+        })
     }
 
     override fun showDummyArtistAndSong() {
@@ -147,8 +150,16 @@ class PlayerFragment : Fragment(), PlayerContract.PlayerView {
 
     private fun initTracksRecyclerView() {
         tracksAdapter = AudioTracksAdapter()
+        val layoutManager = AlphaAndZoomCentralLayoutManager(context).apply {
+            val orientation = resources.configuration.orientation
+            if (orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                lowerBoundAlpha = 0f
+                scaleToMiniCoefficient = 0.6f
+            }
+        }
+
         tracksRecyclerView.setupCarouselRecyclerView(
-            tracksAdapter, AlphaAndZoomCentralLayoutManager(context)
+            tracksAdapter, layoutManager
         )
 
         tracksRecyclerView.attachSnapHelperWithListener(LinearSnapHelper().apply {

@@ -29,5 +29,6 @@ interface PlayerContract {
         fun onNextAction()
         fun onSkipToQueueItem(position: Int)
         fun unregisterMediaController()
+        fun onDestroy()
     }
 }

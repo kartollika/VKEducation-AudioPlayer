@@ -19,5 +19,6 @@ interface MiniPlayerContract {
         fun onPauseAction()
         fun onNextAction()
         fun unregisterMediaController()
+        fun onDestroy()
     }
 }

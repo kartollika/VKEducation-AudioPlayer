@@ -11,6 +11,8 @@ import kartollika.vkeducation.audioplayer.presentation.player.PlayerBasePresente
 class PlayerPresenter(view: PlayerContract.PlayerView) :
     PlayerBasePresenter<PlayerContract.PlayerView>(view), PlayerContract.PlayerPresenter {
 
+    private lateinit var onTracksChangesListener: PlayerService.OnTracksChangesListener
+
     private val mediaControllerCallback = object : MediaControllerCompat.Callback() {
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
@@ -20,16 +22,12 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
                     view.scrollCarouselToPosition(state.position.toInt())
                 }
 
-                PlaybackStateCompat.STATE_STOPPED -> {
-
+                PlaybackStateCompat.STATE_STOPPED, PlaybackStateCompat.STATE_PAUSED -> {
+                    view.switchToPlayAction()
                 }
 
                 PlaybackStateCompat.STATE_PLAYING -> {
                     view.switchToPauseAction()
-                }
-
-                PlaybackStateCompat.STATE_PAUSED -> {
-                    view.switchToPlayAction()
                 }
             }
         }
@@ -48,7 +46,7 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
 
     override fun setPlayerService(playerService: PlayerService) {
         super.setPlayerService(playerService)
-        playerService.addOnTracksChangedListener(object : PlayerService.OnTracksChangesListener {
+        onTracksChangesListener = object : PlayerService.OnTracksChangesListener {
             override fun onTracksChanged(tracks: List<AudioTrack>) {
                 view.fillActiveTracks(tracks)
                 view.changeControlsState(tracks.isNotEmpty())
@@ -56,7 +54,8 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
                     view.showDummyArtistAndSong()
                 }
             }
-        })
+        }
+        playerService.addOnTracksChangedListener(onTracksChangesListener)
         view.changeControlsState(playerService.getActiveTracks().isNotEmpty())
     }
 
@@ -79,32 +78,36 @@ class PlayerPresenter(view: PlayerContract.PlayerView) :
     }
 
     override fun onPauseAction() {
-        mediaController.transportControls.pause()
+        mediaController?.transportControls?.pause()
     }
 
     override fun onPlayAction() {
-        mediaController.transportControls.play()
+        mediaController?.transportControls?.play()
     }
 
     override fun onPreviousAction() {
-        mediaController.transportControls.skipToPrevious()
+        mediaController?.transportControls?.skipToPrevious()
     }
 
     override fun onNextAction() {
-        mediaController.transportControls.skipToNext()
+        mediaController?.transportControls?.skipToNext()
     }
 
     override fun onSkipToQueueItem(position: Int) {
-        mediaController.transportControls?.skipToQueueItem(position.toLong())
+        mediaController?.transportControls?.skipToQueueItem(position.toLong())
     }
 
     override fun unregisterMediaController() {
-        mediaController.unregisterCallback(mediaControllerCallback)
+        mediaController?.unregisterCallback(mediaControllerCallback)
+    }
+
+    override fun onDestroy() {
+        playerService?.removeOnTracksChangedListener(onTracksChangesListener)
     }
 
     private fun setInitialPlayerState() {
-        view.scrollCarouselToPosition(exoPlayer.currentWindowIndex)
-        mediaControllerCallback.onPlaybackStateChanged(mediaController.playbackState)
-        mediaControllerCallback.onMetadataChanged(mediaController.metadata)
+        view.scrollCarouselToPosition(exoPlayer?.currentWindowIndex ?: 0)
+        mediaControllerCallback.onPlaybackStateChanged(mediaController?.playbackState)
+        mediaControllerCallback.onMetadataChanged(mediaController?.metadata)
     }
 }

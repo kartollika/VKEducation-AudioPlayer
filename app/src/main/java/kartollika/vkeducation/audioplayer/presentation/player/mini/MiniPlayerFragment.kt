@@ -12,7 +12,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import kartollika.vkeducation.audioplayer.R
-import kartollika.vkeducation.audioplayer.common.utils.setImageResource
 import kartollika.vkeducation.audioplayer.player.PlayerService
 import kotlinx.android.synthetic.main.view_mini_player.*
 
@@ -67,6 +66,7 @@ class MiniPlayerFragment : Fragment(), MiniPlayerContract.MiniPlayerView {
 
     override fun onDestroy() {
         super.onDestroy()
+        presenter.onDestroy()
         unbindPlayerService()
         presenter.unregisterMediaController()
     }
@@ -84,7 +84,10 @@ class MiniPlayerFragment : Fragment(), MiniPlayerContract.MiniPlayerView {
             albumPreviewImageView.setImageDrawable(null)
             return
         }
-        albumPreviewImageView.setImageResource(resource)
+
+        // Здесь сделано так, потому что было неясно, как именно должен передаваться битмап.
+        // Использовался локальный в соответствии с условием задания
+        albumPreviewImageView.setImageResource((resource as String).toInt())
     }
 
     override fun switchToPlayAction() {
