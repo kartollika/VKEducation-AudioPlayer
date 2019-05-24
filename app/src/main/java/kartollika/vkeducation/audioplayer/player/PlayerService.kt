@@ -217,6 +217,10 @@ class PlayerService : Service() {
             override fun onSkipToQueueItem(id: Long) {
                 super.onSkipToQueueItem(id)
 
+                if (id < 0L) {
+                    return
+                }
+
                 if (id == exoPlayer?.currentWindowIndex?.toLong()) {
                     val skippedTag =
                         mediaSource.getMediaSource(exoPlayer?.currentWindowIndex!!).tag!!
@@ -226,7 +230,7 @@ class PlayerService : Service() {
                     return
                 }
 
-                exoPlayer?.seekTo(id.toInt(), 0)
+                exoPlayer?.seekToDefaultPosition(id.toInt())
                 exoPlayer?.currentWindowIndex?.let { skippedIndex ->
                     playerRepository.skipTo(skippedIndex)
 
