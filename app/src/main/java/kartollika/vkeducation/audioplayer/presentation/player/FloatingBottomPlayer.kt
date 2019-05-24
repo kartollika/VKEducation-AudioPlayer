@@ -89,6 +89,15 @@ class FloatingBottomPlayer(
             }
 
             override fun onStateChanged(p0: View, state: Int) {
+                when (state) {
+                    BottomSheetBehavior.STATE_DRAGGING -> {
+                        playerFullContainerView.visibility = View.VISIBLE
+                    }
+
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        playerFullContainerView.visibility = View.GONE
+                    }
+                }
             }
         })
         playerFullContainerView.visibility = View.VISIBLE
