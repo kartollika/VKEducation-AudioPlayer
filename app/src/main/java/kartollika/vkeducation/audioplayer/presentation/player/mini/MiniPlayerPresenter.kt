@@ -98,9 +98,13 @@ class MiniPlayerPresenter(view: MiniPlayerContract.MiniPlayerView) :
             if (playbackState == Player.STATE_READY) {
                 val newSongLeftTime =
                     (exoPlayer?.duration ?: 0L) - (exoPlayer?.currentPosition ?: 0L)
-                view.updateDurationLeft(
+
+                val leftTimeString = if (newSongLeftTime < 0) {
+                    "--:--"
+                } else {
                     "-${newSongLeftTime.parseIntToLength()}"
-                )
+                }
+                view.updateDurationLeft(leftTimeString)
             }
 
             var delayMs = 1000 - (exoPlayer?.currentPosition ?: 0 % 1000)
