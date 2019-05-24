@@ -16,12 +16,11 @@ fun ImageView.setImageResource(imageResource: Any) {
 }
 
 fun getRandomPreviewImage(): Int {
-    return when (Random().nextInt(5)) {
+    return when (Random().nextInt(4)) {
         0 -> R.drawable.preview1
-        1 -> R.drawable.preview2
-        2 -> R.drawable.preview3
-        3 -> R.drawable.preview4
-        4 -> R.drawable.preview5
+        1 -> R.drawable.preview3
+        2 -> R.drawable.preview4
+        3 -> R.drawable.preview5
         else -> R.drawable.ic_baseline_music_off_24px
     }
 }

@@ -9,7 +9,7 @@
     android:focusableInTouchMode="false">
 
     <FrameLayout
-        android:id="@+id/miniPlayerContainer"
+        android:id="@+id/playerMiniContainerView"
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:visibility="visible" />
