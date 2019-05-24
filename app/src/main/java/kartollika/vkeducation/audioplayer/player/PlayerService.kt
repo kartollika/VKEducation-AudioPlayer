@@ -335,6 +335,10 @@ class PlayerService : Service() {
             notificationChannel = NotificationChannel(
                 notificationChannelId, "VK Education Player", NotificationManager.IMPORTANCE_DEFAULT
             )
+            notificationChannel.setSound(null, null)
+            notificationChannel.enableLights(false)
+            notificationChannel.enableVibration(false)
+
             val notificationManager: NotificationManager =
                 applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notificationManager.createNotificationChannel(notificationChannel)
@@ -524,10 +528,13 @@ class PlayerService : Service() {
 
             override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
                 super.onPlayerStateChanged(playWhenReady, playbackState)
-                if (playbackState == Player.STATE_ENDED && hasEnded) {
+                if (playbackState == Player.STATE_ENDED && !hasEnded) {
                     mediaSessionCallbacks.onPause()
                     hasEnded = true
-                } else {
+                    return
+                }
+
+                if (playbackState == Player.STATE_READY || playbackState == Player.STATE_BUFFERING) {
                     hasEnded = false
                 }
             }
