@@ -78,21 +78,30 @@ class FloatingBottomPlayer(
 
     fun initMiniPlayerFragment(fragmentManager: FragmentManager) {
         fragmentManager.beginTransaction()
-            .replace(R.id.miniPlayerContainer, MiniPlayerFragment.newInstance()).commit()
+            .replace(R.id.playerMiniContainerView, MiniPlayerFragment.newInstance()).commit()
     }
 
     private fun initSmoothAnimations() {
         addCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(p0: View, offset: Float) {
-                miniPlayerContainer.alpha = 1 - 1 / 0.3f * offset
+                playerMiniContainerView.alpha = 1 - 1 / 0.3f * offset
                 playerFullContainerView.alpha = Math.min(1 / 0.3f * offset - 1 - offset, 1f)
             }
 
             override fun onStateChanged(p0: View, state: Int) {
+                when (state) {
+                    BottomSheetBehavior.STATE_DRAGGING -> {
+                        playerFullContainerView.visibility = View.VISIBLE
+                    }
+
+                    BottomSheetBehavior.STATE_COLLAPSED -> {
+                        playerFullContainerView.visibility = View.GONE
+                    }
+                }
             }
         })
         playerFullContainerView.visibility = View.VISIBLE
-        miniPlayerContainer.visibility = View.VISIBLE
+        playerMiniContainerView.visibility = View.VISIBLE
         playerFullContainerView.alpha = 0f
     }
 
