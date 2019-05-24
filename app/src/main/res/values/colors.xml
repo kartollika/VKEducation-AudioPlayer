@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#008577</color>
-    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorPrimaryDark">#14000000</color>
     <color name="colorAccent">#D81B60</color>
+    <color name="mainBackgroundColor">#EBEDF0</color>
+
+    <color name="havelock_blue">#3f8ae0</color>
+    <color name="dodger_blue">#2a8eff</color>
+    <color name="kashmir_blue_alpha_12">#1F45678F</color>
+    <color name="danube">#528bcc</color>
+    <color name="regent_gray">#909499</color>
+
 </resources>

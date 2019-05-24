@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">VKEducationPlayer</string>
+    <string name="choose_music_folder_title">Откуда играть музыку?</string>
+    <string name="choose_music_folder_description">Выберите папку с аудиозаписями</string>
+    <string name="choose_music_folder_action">Выбрать папку</string>
+
+    <string name="timeline_default">0:00</string>
+    <string name="no_tracks_title">Треков нет</string>
+    <string name="no_tracks_summary">Выберите треки и приходите обратно :)</string>
+    <string name="permission_title">Разрешение</string>
+    <string name="permission_ask_can_do_from_application">Для выбора разделя для проигрывания аудио необходимо предоставить разрешение приложению</string>
+    <string name="permission_ask_grant_via_settings">Для выбора разделя для проигрывания аудио необходимо вручную предоставить разрешение приложению</string>
+    <string name="settings_title">Настройки</string>
+    <string name="cancel">Отмена</string>
+    <string name="ok">ОК</string>
 </resources>
