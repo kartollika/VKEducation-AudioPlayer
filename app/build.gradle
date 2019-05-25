@@ -15,6 +15,11 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
+        debug {
+            minifyEnabled true
+            shrinkResources true
+        }
+
         release {
             minifyEnabled true
             shrinkResources true
