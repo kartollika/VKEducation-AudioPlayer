@@ -17,6 +17,10 @@ class FolderChooserActivity : AppCompatActivity() {
 
     companion object {
         const val FOLDER_CHOOSE_REQUEST_CODE = 102
+        const val CHOSEN_FOLDER_KEY = "chosen_folder"
+
+        private const val CURRENT_FOLDER_KEY = "current_folder"
+        private const val BACKSTACK_KEY = "backstack"
     }
 
     private lateinit var foldersAdapter: ChooseFolderAdapter
@@ -36,9 +40,9 @@ class FolderChooserActivity : AppCompatActivity() {
         initStartFolders()
 
         if (savedInstanceState != null) {
-            currentFolder = savedInstanceState.getString("current_folder") ?: ""
+            currentFolder = savedInstanceState.getString(CURRENT_FOLDER_KEY) ?: ""
             previousBackstack =
-                savedInstanceState.getSerializable("backstack") as ArrayDeque<String>?
+                savedInstanceState.getSerializable(BACKSTACK_KEY) as ArrayDeque<String>?
                     ?: ArrayDeque()
         }
 
@@ -49,8 +53,8 @@ class FolderChooserActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
-        outState?.putString("current_folder", currentFolder)
-        outState?.putSerializable("backstack", previousBackstack)
+        outState?.putString(CURRENT_FOLDER_KEY, currentFolder)
+        outState?.putSerializable(BACKSTACK_KEY, previousBackstack)
     }
 
     override fun onBackPressed() {
@@ -64,7 +68,7 @@ class FolderChooserActivity : AppCompatActivity() {
     private fun initFinalChooseAction() {
         chooseFolderActionView.setOnClickListener {
             setResult(Activity.RESULT_OK, Intent().apply {
-                putExtra("chosen_folder", currentFolder)
+                putExtra(CHOSEN_FOLDER_KEY, currentFolder)
             })
             finish()
         }
