@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     companion object {
         private const val PERMISSION_GRANT_VIA_SETTINGS_REQUEST_CODE = 100
         private const val PERMISSION_REQUEST_CODE = 101
+        private const val PLAYER_EXPANDED_KEY = "PlayerExpanded"
+        private const val PLAYER_STATE_KEY = "ServiceState"
     }
 
     private lateinit var presenter: MainActivityPresenter
@@ -92,8 +94,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         presenter = MainActivityPresenter(this)
 
         if (savedInstanceState != null) {
-            isPlayerBounded = savedInstanceState.getBoolean("ServiceState")
-            isPlayerExpanded = savedInstanceState.getBoolean("PlayerExpanded")
+            isPlayerBounded = savedInstanceState.getBoolean(PLAYER_STATE_KEY)
+            isPlayerExpanded = savedInstanceState.getBoolean(PLAYER_EXPANDED_KEY)
         }
 
         openFolderActionView.setOnClickListener {
@@ -116,8 +118,8 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
     }
 
     public override fun onSaveInstanceState(savedInstanceState: Bundle) {
-        savedInstanceState.putBoolean("ServiceState", isPlayerBounded)
-        savedInstanceState.putBoolean("PlayerExpanded", isPlayerExpanded)
+        savedInstanceState.putBoolean(PLAYER_STATE_KEY, isPlayerBounded)
+        savedInstanceState.putBoolean(PLAYER_EXPANDED_KEY, isPlayerExpanded)
         super.onSaveInstanceState(savedInstanceState)
     }
 
@@ -128,7 +130,7 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
                 super.onActivityResult(requestCode, resultCode, data)
 
                 if (resultCode == Activity.RESULT_OK) {
-                    val folder = data?.getStringExtra("chosen_folder") ?: return
+                    val folder = data?.getStringExtra(FolderChooserActivity.CHOSEN_FOLDER_KEY) ?: return
                     PreferencesUtils(this).saveLastPlayedDirectory(folder)
 
                     val playerServiceIntent = Intent(this, PlayerService::class.java)
@@ -162,7 +164,6 @@ class MainActivity : AppCompatActivity(), MainActivityContract.MainActivityView 
         if (requestCode == PERMISSION_REQUEST_CODE && grantResults.size == 1) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 presenter.onOpenFolderStoragePermissionGranted()
-//                bindPlayerService()
             }
 
             if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
